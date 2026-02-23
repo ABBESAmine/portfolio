@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ThemeToggle } from "@/components/ThemeProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -100,13 +101,16 @@ export function Nav() {
 
   return (
     <>
-      {/* Desktop: nav à gauche, liens en colonne */}
+      {/* Desktop: nav à gauche, liens en colonne + toggle thème */}
       <nav
         ref={desktopRef}
-        className="fixed left-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-12"
+        className="fixed left-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-12 items-start"
         aria-label="Navigation principale"
       >
         {navLinks}
+        <div className="mt-4">
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* Mobile: barre + bouton burger */}
@@ -115,15 +119,18 @@ export function Nav() {
           <a href="#hero" className="text-sm font-semibold text-heading" onClick={closeMobile}>
             Portfolio
           </a>
-          <button
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
             className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-heading/30"
             aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={mobileOpen}
-          >
-            <BurgerIcon open={mobileOpen} />
-          </button>
+            >
+              <BurgerIcon open={mobileOpen} />
+            </button>
+          </div>
         </div>
 
         {/* Panneau menu mobile */}

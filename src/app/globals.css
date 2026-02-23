@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* DA : fonds plus soutenus (sable / crème foncé), vert Atlas, orange Berkane */
+/* DA : thème clair (sable / crème foncé), vert Atlas, orange Berkane */
 :root {
   --background: #E2DBCD;
   --section-alt: #E8E2D8;
@@ -17,6 +17,31 @@
   --card: #EDE8E0;
   --card-hover: #e6e0d6;
   --on-dark: #FFFFFF;
+}
+
+/* Thème sombre : mêmes accents, fonds foncés */
+.dark {
+  --background: #1c1f1c;
+  --section-alt: #252825;
+  --dark-section: #064336;
+  --heading: #2dd4a0;
+  --foreground: #e2ddd6;
+  --primary: #E96A00;
+  --primary-hover: #f08020;
+  --accent: #C6A75E;
+  --muted: #a89f92;
+  --border: #3d423d;
+  --card: #2a2e2a;
+  --card-hover: #333832;
+  --on-dark: #FFFFFF;
+}
+
+.dark body::before,
+.dark .bg-section-alt::before {
+  opacity: 0.35;
+}
+.dark .bg-zellige-dark::before {
+  opacity: 0.5;
 }
 
 body {
