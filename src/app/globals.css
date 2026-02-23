@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #0c0111;
+  --background: #f6d7ff;
+  --primary: #c923f3;
+  --secondary: #f875d0;
+  --accent: #f547a6;
+  --muted: #5c4a62;
+  --border: #e8c5f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground: #0c0111;
+    --background: #f6d7ff;
+    --muted: #5c4a62;
+    --border: #e8c5f0;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Blob shapes for hero background */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Scroll progress bar */
+.scroll-progress {
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transform-origin: left;
+}
