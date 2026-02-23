@@ -8,6 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const sections = [
   { id: "hero", label: "Accueil" },
+  { id: "about", label: "À propos" },
   { id: "skills", label: "Compétences" },
   { id: "experience", label: "Expérience" },
   { id: "projects", label: "Projets" },
@@ -49,8 +50,8 @@ export function Nav() {
 
   const linkBase =
     "text-sm font-medium transition-all duration-300 block";
-  const linkActive = "text-primary";
-  const linkInactive = "text-muted hover:text-primary";
+  const linkActive = "text-heading";
+  const linkInactive = "text-muted hover:text-heading";
 
   return (
     <>

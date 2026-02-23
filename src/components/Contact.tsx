@@ -78,9 +78,9 @@ export function Contact() {
     <section
       id="contact"
       ref={sectionRef}
-      className="py-20 lg:py-28 px-6 bg-primary/5"
+      className="relative py-20 lg:py-28 px-6 bg-section-alt pattern-border-bottom"
     >
-      <div className="container mx-auto max-w-5xl">
+      <div className="container mx-auto max-w-5xl relative z-10">
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div ref={leftRef}>
             <h2
@@ -94,7 +94,7 @@ export function Contact() {
               Un projet, une idée ou simplement un bonjour — envoyez-moi un message.
             </p>
             <div className="mt-8 flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-mono text-sm">
+              <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent font-mono text-sm">
                 →
               </div>
               <p className="text-sm text-muted self-center">
@@ -120,7 +120,7 @@ export function Contact() {
                 name="name"
                 type="text"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow"
                 placeholder="Votre nom"
               />
             </div>
@@ -136,7 +136,7 @@ export function Contact() {
                 name="email"
                 type="email"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow"
                 placeholder="vous@exemple.com"
               />
             </div>
@@ -152,14 +152,14 @@ export function Contact() {
                 name="message"
                 required
                 rows={4}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none transition-shadow"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none transition-shadow"
                 placeholder="Votre message..."
               />
             </div>
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full px-6 py-4 rounded-xl bg-primary text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all hover:scale-[1.02]"
+              className="w-full px-6 py-4 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover disabled:opacity-50 transition-all hover:scale-[1.02]"
             >
               {status === "loading" ? "Envoi..." : "Envoyer"}
             </button>

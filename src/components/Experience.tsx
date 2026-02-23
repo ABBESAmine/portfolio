@@ -12,14 +12,21 @@ const experiences = [
     company: "Entreprise XYZ",
     period: "2023 – Présent",
     description:
-      "Développement d'applications web avec React et Node.js, mise en place d'APIs REST.",
+      "Développement d'applications web avec React et Node.js, mise en place d'APIs REST, CI/CD et bases de données (PostgreSQL, Supabase).",
   },
   {
     role: "Développeur Frontend",
     company: "Startup ABC",
     period: "2021 – 2023",
     description:
-      "Interfaces utilisateur avec React et TypeScript, intégration de designs.",
+      "Interfaces utilisateur avec React et TypeScript, intégration de designs Figma, animations (GSAP) et travail en équipe agile.",
+  },
+  {
+    role: "Développeur Web Junior",
+    company: "Agence Digitale",
+    period: "2019 – 2021",
+    description:
+      "Sites vitrines et landing pages, HTML/CSS/JS, premiers projets React et formation continue.",
   },
 ];
 
@@ -70,9 +77,9 @@ export function Experience() {
     <section
       id="experience"
       ref={sectionRef}
-      className="py-20 lg:py-28 px-6 bg-primary/5"
+      className="relative py-20 lg:py-28 px-6 bg-section-alt pattern-border-bottom"
     >
-      <div className="container mx-auto max-w-3xl">
+      <div className="container mx-auto max-w-3xl relative z-10">
         <h2
           ref={titleRef}
           className="font-display text-3xl md:text-4xl font-bold text-center text-foreground mb-16"
@@ -80,7 +87,7 @@ export function Experience() {
           Expérience
         </h2>
 
-        <div className="relative pl-6 md:pl-8 border-l-2 border-primary/30">
+        <div className="relative pl-6 md:pl-8 border-l-2 border-heading/50">
           <ul className="space-y-12">
             {experiences.map((exp, i) => (
               <li
@@ -90,15 +97,16 @@ export function Experience() {
                 }}
                 className="relative"
               >
-                <span className="absolute -left-[29px] md:-left-[33px] top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background" />
-                <div className="p-6 rounded-2xl bg-background border border-border hover:border-primary/40 transition-colors">
+                {/* Pastille centrée sur la barre : bordure 2px + padding (24/32px) + moitié pastille (6px) - centre du trait = 31px / 39px */}
+                <span className="absolute top-1 -left-[31px] md:-left-[39px] w-3 h-3 rounded-full bg-heading shrink-0" />
+                <div className="p-6 rounded-2xl bg-card border border-border hover:border-heading/40 transition-colors">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h3 className="text-lg font-semibold text-foreground">
                       {exp.role}
                     </h3>
                     <span className="text-sm text-muted">{exp.period}</span>
                   </div>
-                  <p className="text-primary font-medium mt-1">{exp.company}</p>
+                  <p className="text-heading font-medium mt-1">{exp.company}</p>
                   <p className="text-muted mt-3">{exp.description}</p>
                 </div>
               </li>

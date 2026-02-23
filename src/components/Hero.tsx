@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
+
+const Hero3D = dynamic(() => import("./Hero3D").then((m) => m.Hero3D), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 z-0 bg-background/80" />,
+});
 
 export function Hero() {
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -63,18 +69,23 @@ export function Hero() {
       id="hero"
       className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 lg:pt-0 overflow-hidden"
     >
+      <div className="absolute inset-0 z-0">
+        <Suspense fallback={<div className="absolute inset-0 bg-background/80" />}>
+          <Hero3D />
+        </Suspense>
+      </div>
       {/* Background blobs */}
       <div
         ref={blob1Ref}
-        className="blob w-[400px] h-[400px] bg-primary -top-40 -right-40 lg:top-1/4 lg:right-1/4"
+        className="blob w-[400px] h-[400px] bg-heading -top-40 -right-40 lg:top-1/4 lg:right-1/4"
       />
       <div
         ref={blob2Ref}
-        className="blob w-[320px] h-[320px] bg-secondary bottom-20 -left-32 lg:bottom-1/4 lg:left-1/4"
+        className="blob w-[320px] h-[320px] bg-accent bottom-20 -left-32 lg:bottom-1/4 lg:left-1/4"
       />
       <div
         ref={blob3Ref}
-        className="blob w-[280px] h-[280px] bg-accent top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="blob w-[280px] h-[280px] bg-primary top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       />
 
       <div className="relative z-10 text-center max-w-4xl">
@@ -103,13 +114,13 @@ export function Hero() {
         <div ref={ctaRef} className="mt-10 flex flex-wrap gap-4 justify-center">
           <a
             href="#projects"
-            className="px-8 py-3.5 rounded-full bg-primary text-white font-medium hover:opacity-90 transition-all hover:scale-105"
+            className="px-8 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-hover transition-all hover:scale-105"
           >
             Voir mes projets
           </a>
           <a
             href="#contact"
-            className="px-8 py-3.5 rounded-full border-2 border-primary text-primary font-medium hover:bg-primary/10 transition-all"
+            className="px-8 py-3.5 rounded-full border-2 border-heading text-heading font-medium hover:bg-heading hover:text-white transition-all"
           >
             Me contacter
           </a>
@@ -121,7 +132,7 @@ export function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted"
       >
         <span className="text-xs uppercase tracking-widest">Scroll</span>
-        <div className="w-px h-10 bg-gradient-to-b from-primary to-transparent rounded-full" />
+        <div className="w-px h-10 bg-gradient-to-b from-heading to-transparent rounded-full" />
       </div>
     </section>
   );

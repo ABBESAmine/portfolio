@@ -17,12 +17,17 @@ const skills = [
   "GSAP",
   "API REST",
   "Figma",
+  "Git",
+  "Three.js",
+  "JavaScript",
+  "HTML / CSS",
+  "Responsive Design",
 ];
 
 export function Skills() {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const marqueeRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -41,12 +46,13 @@ export function Skills() {
         }
       );
       gsap.fromTo(
-        marqueeRef.current,
-        { opacity: 0, y: 30 },
+        gridRef.current?.querySelectorAll(".skill-badge") ?? [],
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
+          duration: 0.5,
+          stagger: 0.04,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
@@ -62,30 +68,31 @@ export function Skills() {
     <section
       id="skills"
       ref={sectionRef}
-      className="py-20 lg:py-28 px-6 overflow-hidden"
+      className="py-20 lg:py-28 px-6"
     >
-      <div className="container mx-auto max-w-6xl">
+      <div className="container mx-auto max-w-5xl">
         <h2
           ref={titleRef}
-          className="font-display text-3xl md:text-4xl font-bold text-center text-foreground mb-14"
+          className="font-display text-3xl md:text-4xl font-bold text-center text-foreground mb-4"
         >
           Compétences
         </h2>
-        <div ref={marqueeRef} className="relative">
-          <div className="flex animate-marquee gap-4 w-max">
-            {[...skills, ...skills].map((name, i) => (
-              <span
-                key={`${name}-${i}`}
-                className="shrink-0 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-foreground font-medium text-sm md:text-base hover:bg-primary/20 hover:border-primary/40 transition-colors"
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-        <p className="text-center text-muted text-sm mt-8 max-w-md mx-auto">
-          Frontend, backend, bases de données et outils d’animation — stack moderne et maintenable.
+        <p className="text-center text-muted text-sm md:text-base max-w-xl mx-auto mb-12">
+          Frontend, backend, bases de données et outils — stack moderne et maintenable.
         </p>
+        <div
+          ref={gridRef}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4"
+        >
+          {skills.map((name) => (
+            <span
+              key={name}
+              className="skill-badge shrink-0 px-4 py-3 rounded-xl bg-card border border-border text-foreground font-medium text-sm text-center hover:bg-card-hover hover:border-heading/40 hover:text-heading transition-all duration-300"
+            >
+              {name}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   );

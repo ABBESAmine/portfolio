@@ -16,11 +16,18 @@ const config: Config = {
       colors: {
         foreground: "var(--foreground)",
         background: "var(--background)",
+        "section-alt": "var(--section-alt)",
+        "dark-section": "var(--dark-section)",
+        heading: "var(--heading)",
         primary: "var(--primary)",
+        "primary-hover": "var(--primary-hover)",
         secondary: "var(--secondary)",
         accent: "var(--accent)",
         muted: "var(--muted)",
         border: "var(--border)",
+        card: "var(--card)",
+        "card-hover": "var(--card-hover)",
+        "on-dark": "var(--on-dark)",
       },
       animation: {
         "marquee": "marquee 25s linear infinite",

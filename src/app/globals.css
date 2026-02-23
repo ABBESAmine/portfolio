@@ -2,23 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* DA : fonds plus soutenus (sable / crème foncé), vert Atlas, orange Berkane */
 :root {
-  --foreground: #0c0111;
-  --background: #f6d7ff;
-  --primary: #c923f3;
-  --secondary: #f875d0;
-  --accent: #f547a6;
-  --muted: #5c4a62;
-  --border: #e8c5f0;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground: #0c0111;
-    --background: #f6d7ff;
-    --muted: #5c4a62;
-    --border: #e8c5f0;
-  }
+  --background: #E2DBCD;
+  --section-alt: #E8E2D8;
+  --dark-section: #084C3D;
+  --heading: #0B6E4F;
+  --foreground: #5A4636;
+  --primary: #E96A00;
+  --primary-hover: #C55300;
+  --accent: #C6A75E;
+  --muted: #5A4636;
+  --border: #c9c2b5;
+  --card: #EDE8E0;
+  --card-hover: #e6e0d6;
+  --on-dark: #FFFFFF;
 }
 
 body {
@@ -26,30 +24,116 @@ body {
   background: var(--background);
 }
 
+/* Fond global : motif étoile 8 branches, une couleur or #C6A75E */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cdefs%3E%3Cpattern id='z' x='0' y='0' width='24' height='24' patternUnits='userSpaceOnUse'%3E%3Cpath d='M12 2.4 L21.6 12 L12 21.6 L2.4 12 Z' fill='none' stroke='%23C6A75E' stroke-width='0.35' stroke-opacity='0.7'/%3E%3Cpath d='M12 6 L18 12 L12 18 L6 12 Z' fill='none' stroke='%23C6A75E' stroke-width='0.35' stroke-opacity='0.7'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='24' height='24' fill='url(%23z)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  opacity: 0.88;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
-/* Gradient text */
+h1, h2, h3 {
+  color: var(--heading);
+}
+
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+  background: linear-gradient(135deg, var(--heading) 0%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Blob shapes for hero background */
 .blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.4;
+  filter: blur(80px);
+  opacity: 0.2;
   pointer-events: none;
 }
 
-/* Scroll progress bar */
 .scroll-progress {
   height: 3px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
+  background: linear-gradient(90deg, #C1272D, #0B6E4F);
   transform-origin: left;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--on-dark);
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--heading);
+  border: 2px solid var(--heading);
+}
+.btn-secondary:hover {
+  background: var(--heading);
+  color: var(--on-dark);
+}
+
+/* Sections alternées : même zellige léger */
+.bg-section-alt {
+  background-color: var(--section-alt);
+}
+.bg-section-alt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cdefs%3E%3Cpattern id='za' x='0' y='0' width='24' height='24' patternUnits='userSpaceOnUse'%3E%3Cpath d='M12 2.4 L21.6 12 L12 21.6 L2.4 12 Z' fill='none' stroke='%23C6A75E' stroke-width='0.35' stroke-opacity='0.7'/%3E%3Cpath d='M12 6 L18 12 L12 18 L6 12 Z' fill='none' stroke='%23C6A75E' stroke-width='0.35' stroke-opacity='0.7'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='24' height='24' fill='url(%23za)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Footer : vert nuit + motif or #C6A75E */
+.bg-dark-section {
+  background-color: var(--dark-section);
+  color: var(--on-dark);
+}
+.bg-zellige-dark {
+  position: relative;
+}
+.bg-zellige-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cdefs%3E%3Cpattern id='zd' x='0' y='0' width='24' height='24' patternUnits='userSpaceOnUse'%3E%3Cpath d='M12 2.4 L21.6 12 L12 21.6 L2.4 12 Z' fill='none' stroke='%23C6A75E' stroke-width='0.35' stroke-opacity='0.6'/%3E%3Cpath d='M12 6 L18 12 L12 18 L6 12 Z' fill='none' stroke='%23C6A75E' stroke-width='0.35' stroke-opacity='0.6'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='24' height='24' fill='url(%23zd)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.pattern-border-bottom {
+  position: relative;
+}
+.pattern-border-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #C1272D 25%,
+    #0B6E4F 50%,
+    #C1272D 75%,
+    transparent 100%
+  );
+  opacity: 0.85;
 }
