@@ -85,12 +85,12 @@ export function About() {
         <div ref={textRef} className="prose prose-invert max-w-none text-center">
           <p className="text-muted text-lg leading-relaxed">
             Développeur full-stack basé en France, je conçois et réalise des applications web
-            performantes et agréables à utiliser. De l'idée au déploiement, j'aime
+            performantes et agréables à utiliser. De l&apos;idée au déploiement, j&apos;aime
             travailler sur toute la chaîne : frontend (React, Next.js), backend (Node.js), bases
             de données et intégration continue.
           </p>
           <p className="text-muted mt-4 text-lg leading-relaxed">
-            Curieux des nouvelles technologies, j'intègre volontiers du 3D (Three.js),
+            Curieux des nouvelles technologies, j&apos;intègre volontiers du 3D (Three.js),
             des animations (GSAP) et des APIs modernes pour offrir des expériences utilisateur
             mémorables.
           </p>
