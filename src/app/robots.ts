@@ -1,6 +1,10 @@
 import { MetadataRoute } from "next";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
+const baseUrlRaw = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
+const baseUrl =
+  baseUrlRaw.startsWith("http://") || baseUrlRaw.startsWith("https://")
+    ? baseUrlRaw
+    : `https://${baseUrlRaw}`;
 
 export default function robots(): MetadataRoute.Robots {
   return {

@@ -21,7 +21,11 @@ const syne = Syne({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
+const siteUrlRaw = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
+const siteUrl =
+  siteUrlRaw.startsWith("http://") || siteUrlRaw.startsWith("https://")
+    ? siteUrlRaw
+    : `https://${siteUrlRaw}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
