@@ -7,20 +7,6 @@ export function Footer() {
         <p className="text-sm text-on-dark/90">
           © {new Date().getFullYear()} — Tous droits réservés
         </p>
-        <nav className="flex items-center gap-8" aria-label="Pied de page">
-          <a
-            href="#contact"
-            className="text-sm font-medium text-on-dark/90 hover:text-on-dark transition-colors"
-          >
-            Contact
-          </a>
-          <a
-            href="#projects"
-            className="text-sm font-medium text-on-dark/90 hover:text-on-dark transition-colors"
-          >
-            Projets
-          </a>
-        </nav>
       </div>
     </footer>
   );

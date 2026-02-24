@@ -8,34 +8,28 @@ gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
   {
-    title: "Application E-commerce",
-    stack: "Next.js, Stripe, Supabase",
+    title: "Navigation multi-bâtiments à l'ESPCI",
+    stack: "HTML, CSS, JavaScript, SPIP",
     description:
-      "Boutique en ligne avec panier, paiement sécurisé et tableau de bord admin. Gestion des stocks et des commandes.",
+      "Application web interactive de navigation multi-bâtiments. Interface dynamique avec gestion des plans, légendes et affectations. Partie back-end pour la gestion et la mise à jour des données. Outil de conversion LDAP vers base relationnelle. Amélioration de la gestion interne et autonomie accrue des équipes administratives.",
     link: "#",
     featured: true,
   },
   {
-    title: "Dashboard Analytics",
-    stack: "React, Node.js, PostgreSQL",
-    description: "Visualisation de données en temps réel avec graphiques interactifs et export PDF.",
+    title: "Gestion des demandes de logement étudiant",
+    stack: "Web, formulaire, interface admin, e-mails automatisés",
+    description:
+      "Site de gestion des demandes de logement étudiant pour les élèves de l'ESPCI Paris. Formulaire en ligne et interface administrateur pour le suivi et la mise Ã  jour des candidatures (en attente, acceptée, refusée). Système d'e-mails automatisés déclenchés lors des changements de statut.",
     link: "#",
     featured: false,
   },
   {
     title: "Portfolio",
     stack: "Next.js, Tailwind, GSAP, Three.js",
-    description: "Site vitrine avec animations 3D, sections garnies et formulaire de contact.",
+    description: "Site vitrine avec animations 3D, thème clair/sombre, formulaire de contact et envoi d'e-mails.",
     link: "#",
     featured: false,
-  },
-  {
-    title: "API de réservation",
-    stack: "Node.js, PostgreSQL, JWT",
-    description: "Backend REST pour réservations avec authentification et envoi d’emails.",
-    link: "#",
-    featured: false,
-  },
+  }
 ];
 
 export function Projects() {
@@ -89,7 +83,7 @@ export function Projects() {
     <section
       id="projects"
       ref={sectionRef}
-      className="py-20 lg:py-28 px-6"
+      className="relative py-20 lg:py-28 px-6 pattern-border-bottom"
     >
       <div className="container mx-auto max-w-5xl">
         <h2
@@ -102,19 +96,16 @@ export function Projects() {
           Applications web, APIs et interfaces — du prototype au déploiement.
         </p>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        {/* Bento : vedette à gauche (2 rows), 2 autres à droite (1 row chacun) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <a
             ref={(el) => {
               cellsRef.current[0] = el;
             }}
             href={featured.link}
-            className="md:col-span-4 md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 transition-all group"
+            className="md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 transition-all group min-h-[280px] md:min-h-0"
           >
-            <span className="text-xs font-medium text-heading uppercase tracking-wider">
-              Projet vedette
-            </span>
-            <h3 className="font-display text-2xl md:text-3xl font-bold gradient-text mt-2">
+            <h3 className="font-display text-2xl md:text-3xl font-bold gradient-text">
               {featured.title}
             </h3>
             <p className="text-sm text-muted mt-1">{featured.stack}</p>
@@ -127,13 +118,13 @@ export function Projects() {
                 cellsRef.current[i + 1] = el;
               }}
               href={project.link}
-              className="md:col-span-2 block p-6 rounded-2xl bg-card border border-border hover:border-secondary/50 hover:shadow-lg transition-all group"
+              className="block p-6 md:p-7 rounded-2xl bg-card border border-border hover:border-heading/50 hover:shadow-lg transition-all group min-h-[200px]"
             >
-              <h3 className="font-semibold text-foreground group-hover:text-heading transition-colors">
+              <h3 className="font-display text-xl font-bold gradient-text">
                 {project.title}
               </h3>
               <p className="text-sm text-muted mt-1">{project.stack}</p>
-              <p className="text-muted text-sm mt-3 line-clamp-2">
+              <p className="text-muted mt-4 text-sm leading-relaxed">
                 {project.description}
               </p>
             </a>

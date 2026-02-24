@@ -29,6 +29,7 @@ const config: Config = {
         card: "var(--card)",
         "card-hover": "var(--card-hover)",
         "on-dark": "var(--on-dark)",
+        red: "var(--red)",
       },
       animation: {
         "marquee": "marquee 25s linear infinite",

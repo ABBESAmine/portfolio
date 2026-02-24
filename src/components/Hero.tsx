@@ -67,7 +67,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 lg:pt-0 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 lg:pt-0 overflow-hidden pattern-border-bottom"
     >
       <div className="absolute inset-0 z-0">
         <Suspense fallback={<div className="absolute inset-0 bg-background/80" />}>
@@ -132,7 +132,7 @@ export function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted"
       >
         <span className="text-xs uppercase tracking-widest">Scroll</span>
-        <div className="w-px h-10 bg-gradient-to-b from-heading to-transparent rounded-full" />
+        <div className="w-px h-10 bg-gradient-to-b from-red to-transparent rounded-full" />
       </div>
     </section>
   );

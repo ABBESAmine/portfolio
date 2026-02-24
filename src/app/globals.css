@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* DA : thème clair (sable / crème foncé), vert Atlas, orange Berkane */
+/* DA : thème clair (sable / crème foncé), vert Atlas, orange Berkane, rouge */
 :root {
   --background: #E2DBCD;
   --section-alt: #E8E2D8;
@@ -12,6 +12,7 @@
   --primary: #E96A00;
   --primary-hover: #C55300;
   --accent: #C6A75E;
+  --red: #C1272D;
   --muted: #5A4636;
   --border: #c9c2b5;
   --card: #EDE8E0;
@@ -29,6 +30,7 @@
   --primary: #E96A00;
   --primary-hover: #f08020;
   --accent: #C6A75E;
+  --red: #e84a4f;
   --muted: #a89f92;
   --border: #3d423d;
   --card: #2a2e2a;
@@ -69,8 +71,24 @@ h1, h2, h3 {
   color: var(--heading);
 }
 
+/* Ligne d’accent rouge sous les titres de section */
+h2 {
+  position: relative;
+  padding-bottom: 0.35em;
+}
+h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 2.5rem;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red), var(--heading));
+  border-radius: 2px;
+}
+
 .gradient-text {
-  background: linear-gradient(135deg, var(--heading) 0%, var(--accent) 100%);
+  background: linear-gradient(135deg, var(--heading) 0%, var(--red) 50%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -106,6 +124,12 @@ h1, h2, h3 {
 .btn-secondary:hover {
   background: var(--heading);
   color: var(--on-dark);
+}
+
+/* Lien accent rouge (hover) */
+a.text-heading:hover,
+a[href].text-heading:hover {
+  color: var(--red);
 }
 
 /* Sections alternées : même zellige léger */

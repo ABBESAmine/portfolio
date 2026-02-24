@@ -8,25 +8,11 @@ gsap.registerPlugin(ScrollTrigger);
 
 const experiences = [
   {
-    role: "Développeur Full-Stack",
-    company: "Entreprise XYZ",
-    period: "2023 – Présent",
+    role: "Développeur Full-Stack en alternance",
+    company: "ESPCI Paris",
+    period: "Octobre 2023 – Septembre 2026",
     description:
-      "Développement d'applications web avec React et Node.js, mise en place d'APIs REST, CI/CD et bases de données (PostgreSQL, Supabase).",
-  },
-  {
-    role: "Développeur Frontend",
-    company: "Startup ABC",
-    period: "2021 – 2023",
-    description:
-      "Interfaces utilisateur avec React et TypeScript, intégration de designs Figma, animations (GSAP) et travail en équipe agile.",
-  },
-  {
-    role: "Développeur Web Junior",
-    company: "Agence Digitale",
-    period: "2019 – 2021",
-    description:
-      "Sites vitrines et landing pages, HTML/CSS/JS, premiers projets React et formation continue.",
+      "Application web interactive de navigation multi-bâtiments (HTML, CSS, JavaScript, SPIP). Site de gestion des demandes de logement étudiant avec formulaire, interface admin et e-mails automatisés. Back-end, conversion LDAP et bases de données relationnelles.",
   },
 ];
 

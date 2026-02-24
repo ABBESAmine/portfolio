@@ -1,0 +1,24 @@
+{
+  "name": "Portfolio Amine Abbes — Développeur Full-Stack",
+  "short_name": "Portfolio Amine Abbes",
+  "description": "Développeur Full-Stack en alternance à l'ESPCI Paris. Portfolio, projets et contact.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E2DBCD",
+  "theme_color": "#0B6E4F",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

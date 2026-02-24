@@ -16,12 +16,12 @@ const skills = [
   "Supabase",
   "GSAP",
   "API REST",
-  "Figma",
   "Git",
   "Three.js",
   "JavaScript",
   "HTML / CSS",
   "Responsive Design",
+  "SPIP",
 ];
 
 export function Skills() {
@@ -68,7 +68,7 @@ export function Skills() {
     <section
       id="skills"
       ref={sectionRef}
-      className="py-20 lg:py-28 px-6"
+      className="relative py-20 lg:py-28 px-6 pattern-border-bottom"
     >
       <div className="container mx-auto max-w-5xl">
         <h2
