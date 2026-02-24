@@ -1,5 +1,8 @@
 [build]
   command = "npm run build"
+  # Ne pas laisser la racine du repo en "Publish directory" (sinon le plugin Next.js refuse).
+  # Le plugin utilise cette valeur ; ne pas définir "Publish directory" dans l’UI Netlify.
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
