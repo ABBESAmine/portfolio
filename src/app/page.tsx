@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main>
+    <main className="w-full min-w-0">
       <Hero />
       <About />
       <Skills />
