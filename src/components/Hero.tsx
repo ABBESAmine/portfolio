@@ -112,6 +112,17 @@ export function Hero() {
       id="hero"
       className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 lg:pt-0 overflow-hidden pattern-border-bottom"
     >
+      {/* Ornement coin haut droite (PC) — z-0 pour rester derrière les blobs */}
+      <div
+        className="absolute top-8 right-8 z-0 hidden lg:block w-16 h-16 text-heading/40 opacity-70"
+        aria-hidden
+      >
+        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.8">
+          <path d="M32 8 L56 32 L32 56 L8 32 Z" />
+          <path d="M32 16 L48 32 L32 48 L16 32 Z" />
+          <path d="M32 24 L40 32 L32 40 L24 32 Z" />
+        </svg>
+      </div>
       {/* Canvas en premier (z-0), comme sur amineabb.es */}
       <div className="absolute inset-0 z-0">
         <Suspense fallback={<div className="absolute inset-0 bg-background/80" />}>
