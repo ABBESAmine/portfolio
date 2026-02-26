@@ -13,6 +13,7 @@ const Hero3D = dynamic(() => import("./Hero3D").then((m) => m.Hero3D), {
 const PARALLAX_STRENGTH = 8;
 
 type BlobOffset = { x: number; y: number };
+type TitleGlow = { x: number; y: number; active: boolean };
 
 export function Hero() {
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -24,12 +25,14 @@ export function Hero() {
   const blob2Ref = useRef<HTMLDivElement>(null);
   const blob3Ref = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const titleHoverRef = useRef<HTMLDivElement>(null);
 
   const [blobMove, setBlobMove] = useState<{ b1: BlobOffset; b2: BlobOffset; b3: BlobOffset }>({
     b1: { x: 0, y: 0 },
     b2: { x: 0, y: 0 },
     b3: { x: 0, y: 0 },
   });
+  const [titleGlow, setTitleGlow] = useState<TitleGlow>({ x: 0, y: 0, active: false });
 
   const words = ["Développeur", "Full-Stack"];
 
@@ -62,6 +65,19 @@ export function Hero() {
     window.addEventListener("mousemove", onMouseMove);
     return () => window.removeEventListener("mousemove", onMouseMove);
   }, []);
+
+  const handleTitleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTitleGlow({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      active: true,
+    });
+  };
+
+  const handleTitleLeave = () => {
+    setTitleGlow((prev) => ({ ...prev, active: false }));
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -148,22 +164,52 @@ export function Hero() {
       />
 
       <div className="relative z-10 text-center max-w-4xl">
-        <h1
-          ref={titleRef}
-          className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-foreground"
+        <div
+          ref={titleHoverRef}
+          className="relative inline-block cursor-default select-none"
+          onMouseMove={handleTitleMove}
+          onMouseEnter={handleTitleMove}
+          onMouseLeave={handleTitleLeave}
         >
-          {words.map((word, i) => (
-            <span
-              key={word}
-              ref={(el) => {
-                if (el) wordRefs.current[i] = el;
-              }}
-              className={i === 0 ? "block" : "block gradient-text"}
-            >
-              {word}
-            </span>
-          ))}
-        </h1>
+          <h1
+            ref={titleRef}
+            className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-foreground"
+          >
+            {words.map((word, i) => (
+              <span
+                key={word}
+                ref={(el) => {
+                  if (el) wordRefs.current[i] = el;
+                }}
+                className={i === 0 ? "block" : "block gradient-text"}
+              >
+                {word}
+              </span>
+            ))}
+          </h1>
+
+          <h1
+            aria-hidden
+            className={`pointer-events-none absolute inset-0 font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight transition-opacity duration-150 ${
+              titleGlow.active ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              color: "transparent",
+              WebkitTextFillColor: "transparent",
+              backgroundImage: "linear-gradient(135deg, var(--heading) 0%, var(--red) 50%, var(--accent) 100%)",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              WebkitMaskImage: `radial-gradient(110px circle at ${titleGlow.x}px ${titleGlow.y}px, black 0%, black 55%, transparent 100%)`,
+              maskImage: `radial-gradient(110px circle at ${titleGlow.x}px ${titleGlow.y}px, black 0%, black 55%, transparent 100%)`,
+            }}
+          >
+            {words.map((word) => (
+              <span key={`glow-${word}`} className="block">
+                {word}
+              </span>
+            ))}
+          </h1>
+        </div>
         <p
           ref={subtitleRef}
           className="mt-6 text-lg md:text-xl text-muted max-w-xl mx-auto"
