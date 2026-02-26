@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { TiltCard } from "@/components/TiltCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -35,7 +36,7 @@ const projects = [
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const cellsRef = useRef<(HTMLAnchorElement | null)[]>([]);
+  const cellsRef = useRef<(HTMLAnchorElement | HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -98,27 +99,29 @@ export function Projects() {
 
         {/* Bento : vedette à gauche (2 rows), 2 autres à droite (1 row chacun) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a
+          <TiltCard
             ref={(el) => {
               cellsRef.current[0] = el;
             }}
             href={featured.link}
-            className="md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 transition-all group min-h-[280px] md:min-h-0"
+            as="a"
+            className="md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] group min-h-[280px] md:min-h-0"
           >
             <h3 className="font-display text-2xl md:text-3xl font-bold gradient-text">
               {featured.title}
             </h3>
             <p className="text-sm text-muted mt-1">{featured.stack}</p>
             <p className="text-muted mt-4">{featured.description}</p>
-          </a>
+          </TiltCard>
           {others.map((project, i) => (
-            <a
+            <TiltCard
               key={project.title}
               ref={(el) => {
                 cellsRef.current[i + 1] = el;
               }}
               href={project.link}
-              className="block p-6 md:p-7 rounded-2xl bg-card border border-border hover:border-heading/50 hover:shadow-lg transition-all group min-h-[200px]"
+              as="a"
+              className="block p-6 md:p-7 rounded-2xl bg-card border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] group min-h-[200px]"
             >
               <h3 className="font-display text-xl font-bold gradient-text">
                 {project.title}
@@ -127,7 +130,7 @@ export function Projects() {
               <p className="text-muted mt-4 text-sm leading-relaxed">
                 {project.description}
               </p>
-            </a>
+            </TiltCard>
           ))}
         </div>
       </div>
