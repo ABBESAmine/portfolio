@@ -1,25 +1,32 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const experiences = [
-  {
-    role: "Développeur Full-Stack en alternance",
-    company: "ESPCI Paris",
-    period: "Octobre 2023 – Septembre 2026",
-    description:
-      "Application web interactive de navigation multi-bâtiments (HTML, CSS, JavaScript, SPIP). Site de gestion des demandes de logement étudiant avec formulaire, interface admin et e-mails automatisés. Back-end, conversion LDAP et bases de données relationnelles.",
-  },
-];
+type ExperienceItem = {
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+};
 
 export function Experience() {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const itemsRef = useRef<(HTMLLIElement | null)[]>([]);
+  const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
+
+  useEffect(() => {
+    fetch("/api/experiences")
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: ExperienceItem[]) => {
+        setExperiences(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setExperiences([]));
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -57,7 +64,7 @@ export function Experience() {
       });
     }, sectionRef);
     return () => ctx.revert();
-  }, []);
+  }, [experiences]);
 
   return (
     <section

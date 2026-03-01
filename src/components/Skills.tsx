@@ -1,33 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const skills = [
-  "React",
-  "Next.js",
-  "TypeScript",
-  "Tailwind CSS",
-  "Node.js",
-  "PostgreSQL",
-  "Supabase",
-  "GSAP",
-  "API REST",
-  "Git",
-  "Three.js",
-  "JavaScript",
-  "HTML / CSS",
-  "Responsive Design",
-  "SPIP",
-];
-
 export function Skills() {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const [skills, setSkills] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/skills")
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: { name: string }[]) => {
+        setSkills(Array.isArray(data) ? data.map((s) => s.name) : []);
+      })
+      .catch(() => setSkills([]));
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -62,7 +54,7 @@ export function Skills() {
       );
     }, sectionRef);
     return () => ctx.revert();
-  }, []);
+  }, [skills]);
 
   return (
     <section
