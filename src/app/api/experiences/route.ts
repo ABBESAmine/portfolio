@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase-server";
-import { getUserFromToken, isAdminUser } from "@/lib/supabase-auth";
+import { getSupabasePublic } from "@/lib/supabase-server";
+import { getSupabaseUserClient, getUserFromToken } from "@/lib/supabase-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +25,6 @@ export async function POST(request: Request) {
     const user = await getUserFromToken(token);
     if (!user) {
       return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
-    }
-    if (!isAdminUser(user)) {
-      return NextResponse.json({ error: "Accès interdit (admin requis)." }, { status: 403 });
     }
     const body = await request.json();
     const role = typeof body.role === "string" ? body.role.trim() : "";
@@ -55,16 +52,32 @@ export async function POST(request: Request) {
     if (sortOrder < 0 || sortOrder > 10000) {
       return NextResponse.json({ error: "sort_order invalide." }, { status: 400 });
     }
-    const db = getSupabaseAdmin();
+    const db = getSupabaseUserClient(token);
+    if (!db) {
+      return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
+    }
     const { data, error } = await db
       .from("experiences")
       .insert({ role, company, period, description, sort_order: sortOrder })
       .select("id, role, company, period")
       .single();
-    if (error) throw error;
+    if (error) {
+      if (isPermissionError(error)) {
+        return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
+      }
+      throw error;
+    }
     return NextResponse.json(data);
   } catch (err) {
     console.error("POST /api/experiences", err);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
+}
+
+function isPermissionError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = "code" in error ? String((error as { code?: unknown }).code ?? "") : "";
+  const message =
+    "message" in error ? String((error as { message?: unknown }).message ?? "") : "";
+  return code === "42501" || /row-level security|permission denied/i.test(message);
 }
