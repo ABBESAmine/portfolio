@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-
-const TO_EMAIL = "amine.abbes94370@gmail.com";
+import { getSupabaseAdmin } from "@/lib/supabase-server";
 
 export type ContactBody = {
   name?: string;
@@ -13,8 +12,12 @@ export async function POST(request: Request) {
   try {
     const body: ContactBody = await request.json();
     const { name, email, message } = body;
+
+    // [C1] IP réel — x-real-ip est injecté par Vercel, non falsifiable par le client
     const ip = getClientIp(request);
-    if (!consumeRateLimit(ip)) {
+    // [C2] Rate limiting persistent via Supabase (survivre aux cold starts serverless)
+    const allowed = await consumeRateLimit(ip);
+    if (!allowed) {
       return NextResponse.json(
         { error: "Trop de requêtes. Réessaie dans quelques minutes." },
         { status: 429 }
@@ -46,10 +49,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // [M1] Email de destination lu depuis les variables d'environnement
+    const toEmail = process.env.CONTACT_TO_EMAIL;
+    if (!toEmail) {
+      console.error("CONTACT_TO_EMAIL manquante");
+      return NextResponse.json(
+        { error: "Configuration email manquante." },
+        { status: 500 }
+      );
+    }
+
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
       from: "Portfolio <onboarding@resend.dev>",
-      to: TO_EMAIL,
+      to: toEmail,
       replyTo: cleanEmail,
       subject: `Contact portfolio : ${cleanName.slice(0, 50)}`,
       text: `Nom : ${cleanName}\nEmail : ${cleanEmail}\n\nMessage :\n${cleanMessage}`,
@@ -89,29 +102,57 @@ function escapeHtml(s: string): string {
 }
 
 function isValidEmail(email: string): boolean {
-  // Validation simple côté API pour réduire les entrées invalides.
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-const RATE_WINDOW_MS = 10 * 60 * 1000;
-const RATE_LIMIT_MAX = 5;
-const rateStore = new Map<string, { count: number; resetAt: number }>();
-
+// [C1] x-real-ip est injecté par Vercel côté edge et ne peut pas être falsifié par le client.
+// Contrairement à x-forwarded-for qui est un header modifiable par n'importe qui.
 function getClientIp(request: Request): string {
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp?.trim()) return realIp.trim();
+  // Fallback pour les environnements non-Vercel (ex: dev local)
   const xff = request.headers.get("x-forwarded-for");
   if (!xff) return "unknown";
   return xff.split(",")[0]?.trim() || "unknown";
 }
 
-function consumeRateLimit(key: string): boolean {
-  const now = Date.now();
-  const entry = rateStore.get(key);
-  if (!entry || now > entry.resetAt) {
-    rateStore.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
+// [C2] Rate limiting persistent via Supabase.
+// Prérequis : exécuter migrations/001_contact_rate_limit.sql dans le SQL Editor Supabase.
+// En cas d'erreur DB, le request est autorisé (fail-open) pour éviter de bloquer les utilisateurs légitimes.
+const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX = 5;
+
+async function consumeRateLimit(ip: string): Promise<boolean> {
+  try {
+    const db = getSupabaseAdmin();
+    const now = Date.now();
+    const resetAt = new Date(now + RATE_WINDOW_MS).toISOString();
+
+    const { data } = await db
+      .from("contact_rate_limit")
+      .select("count, reset_at")
+      .eq("ip", ip)
+      .maybeSingle();
+
+    if (!data || new Date(data.reset_at).getTime() < now) {
+      // Aucune entrée ou fenêtre expirée — démarrer à 1
+      await db.from("contact_rate_limit").upsert(
+        { ip, count: 1, reset_at: resetAt },
+        { onConflict: "ip" }
+      );
+      return true;
+    }
+
+    if (data.count >= RATE_LIMIT_MAX) return false;
+
+    await db
+      .from("contact_rate_limit")
+      .update({ count: data.count + 1 })
+      .eq("ip", ip);
+
+    return true;
+  } catch {
+    console.error("Rate limit DB error — failing open");
     return true;
   }
-  if (entry.count >= RATE_LIMIT_MAX) return false;
-  entry.count += 1;
-  rateStore.set(key, entry);
-  return true;
 }

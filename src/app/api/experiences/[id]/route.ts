@@ -19,6 +19,10 @@ export async function DELETE(
     if (!id) {
       return NextResponse.json({ error: "id requis." }, { status: 400 });
     }
+    // [M3] Validation UUID pour éviter les requêtes malformées
+    if (!isValidUuid(id)) {
+      return NextResponse.json({ error: "id invalide." }, { status: 400 });
+    }
     const db = getSupabaseUserClient(token);
     if (!db) {
       return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
@@ -35,6 +39,11 @@ export async function DELETE(
     console.error("DELETE /api/experiences/[id]", err);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isValidUuid(id: string): boolean {
+  return UUID_RE.test(id);
 }
 
 function isPermissionError(error: unknown): boolean {
