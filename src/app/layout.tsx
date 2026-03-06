@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Syne } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
@@ -26,6 +26,15 @@ const siteUrl =
   siteUrlRaw.startsWith("http://") || siteUrlRaw.startsWith("https://")
     ? siteUrlRaw
     : `https://${siteUrlRaw}`;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#E2DBCD" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c1f1c" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -74,11 +83,6 @@ export const metadata: Metadata = {
     },
   },
   category: "technology",
-  viewport: { width: "device-width", initialScale: 1 },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#E2DBCD" },
-    { media: "(prefers-color-scheme: dark)", color: "#1c1f1c" },
-  ],
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
