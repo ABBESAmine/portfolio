@@ -30,35 +30,22 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Portfolio | Amine Abbes — Développeur Full-Stack",
+    default: "Développeur Full-Stack React — Amine Abbes | Paris",
     template: "%s | Amine Abbes",
   },
   description:
-    "Développeur Full-Stack en alternance à l'ESPCI Paris. Applications web (React, Next.js, Node.js), navigation multi-bâtiments, gestion de demandes et interfaces dynamiques. Portfolio et contact.",
-  keywords: [
-    "développeur full-stack",
-    "développeur web",
-    "React",
-    "Next.js",
-    "Node.js",
-    "ESPCI",
-    "alternance",
-    "portfolio",
-    "JavaScript",
-    "TypeScript",
-  ],
+    "Développeur Full-Stack en alternance à l'ESPCI Paris. Applications web React, Next.js et Node.js. 10+ projets livrés, du prototype au déploiement.",
   authors: [{ name: "Amine Abbes", url: siteUrl }],
   creator: "Amine Abbes",
   publisher: "Amine Abbes",
-  formatDetection: { email: false, address: false, telephone: false },
   openGraph: {
     type: "website",
     locale: "fr_FR",
     url: siteUrl,
     siteName: "Portfolio Amine Abbes",
-    title: "Portfolio | Amine Abbes — Développeur Full-Stack",
+    title: "Développeur Full-Stack React — Amine Abbes | Paris",
     description:
-      "Développeur Full-Stack en alternance à l'ESPCI. Applications web, React, Next.js. Portfolio et projets.",
+      "Développeur Full-Stack en alternance à l'ESPCI Paris. Applications web React, Next.js et Node.js. 10+ projets livrés, du prototype au déploiement.",
     images: [
       {
         url: "/og-image.png",
@@ -70,16 +57,22 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Portfolio | Amine Abbes — Développeur Full-Stack",
-    description: "Développeur Full-Stack, React, Next.js. Portfolio et contact.",
+    title: "Développeur Full-Stack React — Amine Abbes | Paris",
+    description:
+      "Développeur Full-Stack en alternance à l'ESPCI Paris. Applications web React, Next.js et Node.js. 10+ projets livrés.",
     images: ["/og-image.png"],
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true },
   },
-  alternates: { canonical: siteUrl },
+  alternates: {
+    canonical: siteUrl,
+    languages: {
+      fr: siteUrl,
+      "x-default": siteUrl,
+    },
+  },
   category: "technology",
   viewport: { width: "device-width", initialScale: 1 },
   themeColor: [

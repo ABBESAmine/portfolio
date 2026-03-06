@@ -183,12 +183,12 @@ export function Hero() {
                 }}
                 className={i === 0 ? "block" : "block gradient-text"}
               >
-                {word}
+                {word}{i < words.length - 1 ? " " : ""}
               </span>
             ))}
           </h1>
 
-          <h1
+          <div
             aria-hidden
             className={`pointer-events-none absolute inset-0 font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight transition-opacity duration-150 ${
               titleGlow.active ? "opacity-100" : "opacity-0"
@@ -208,7 +208,7 @@ export function Hero() {
                 {word}
               </span>
             ))}
-          </h1>
+          </div>
         </div>
         <p
           ref={subtitleRef}

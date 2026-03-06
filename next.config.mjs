@@ -1,14 +1,16 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV === "development";
+
 const nextConfig = {
   transpilePackages: ["three", "@react-three/fiber", "@react-three/drei"],
   async headers() {
     // [H1] Content Security Policy
     // unsafe-inline requis : Next.js injecte des scripts/styles inline pour le rendu,
     // et le script de détection de thème est inline dans le layout.
-    // Pour une CSP stricte sans unsafe-inline, migrer vers des nonces CSP.
+    // unsafe-eval ajouté uniquement en développement pour React Refresh (hot reload).
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       // next/font/google télécharge les polices au build et les sert localement

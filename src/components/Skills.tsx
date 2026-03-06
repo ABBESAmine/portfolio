@@ -6,19 +6,19 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function Skills() {
+export function Skills({ initialData = [] }: { initialData?: { name: string }[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const [skills, setSkills] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>(initialData.map((s) => s.name));
 
   useEffect(() => {
     fetch("/api/skills")
-      .then((res) => res.ok ? res.json() : [])
-      .then((data: { name: string }[]) => {
-        setSkills(Array.isArray(data) ? data.map((s) => s.name) : []);
+      .then((res) => res.ok ? res.json() : null)
+      .then((data: { name: string }[] | null) => {
+        if (Array.isArray(data)) setSkills(data.map((s) => s.name));
       })
-      .catch(() => setSkills([]));
+      .catch(() => {});
   }, []);
 
   useEffect(() => {

@@ -15,19 +15,19 @@ type ProjectItem = {
   featured: boolean;
 };
 
-export function Projects() {
+export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cellsRef = useRef<(HTMLAnchorElement | HTMLDivElement | null)[]>([]);
-  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [projects, setProjects] = useState<ProjectItem[]>(initialData);
 
   useEffect(() => {
     fetch("/api/projects")
-      .then((res) => res.ok ? res.json() : [])
-      .then((data: ProjectItem[]) => {
-        setProjects(Array.isArray(data) ? data : []);
+      .then((res) => res.ok ? res.json() : null)
+      .then((data: ProjectItem[] | null) => {
+        if (Array.isArray(data)) setProjects(data);
       })
-      .catch(() => setProjects([]));
+      .catch(() => {});
   }, []);
 
   useEffect(() => {

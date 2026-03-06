@@ -84,15 +84,22 @@ export function About() {
         </h2>
         <div ref={textRef} className="prose prose-invert max-w-none text-center">
           <p className="text-muted text-lg leading-relaxed">
-            Développeur full-stack basé en France, je conçois et réalise des applications web
-            performantes et agréables à utiliser. De l&apos;idée au déploiement, j&apos;aime
-            travailler sur toute la chaîne : frontend (React, Next.js), backend (Node.js), bases
-            de données et intégration continue.
+            Développeur full-stack basé à Paris, j&apos;effectue mon alternance à l&apos;ESPCI Paris
+            où je conçois et réalise des applications web performantes et agréables à utiliser.
+            De l&apos;idée au déploiement, j&apos;interviens sur toute la chaîne : interfaces
+            React et Next.js côté frontend, APIs Node.js côté backend, bases de données et
+            pipelines de déploiement continu.
           </p>
           <p className="text-muted mt-4 text-lg leading-relaxed">
-            Curieux des nouvelles technologies, j&apos;intègre volontiers du 3D (Three.js),
-            des animations (GSAP) et des APIs modernes pour offrir des expériences utilisateur
-            mémorables.
+            Avec plus de 3 ans d&apos;expérience et 10 projets livrés, j&apos;attache une attention
+            particulière à la qualité du code, à l&apos;accessibilité et aux performances.
+            Ma stack principale s&apos;articule autour de React, Next.js, Node.js et TypeScript,
+            complétée par Supabase pour la gestion des données.
+          </p>
+          <p className="text-muted mt-4 text-lg leading-relaxed">
+            Curieux des nouvelles technologies, j&apos;intègre volontiers du 3D avec Three.js
+            et des animations avec GSAP pour créer des interfaces mémorables et distinctives.
+            Disponible pour des collaborations freelance ou des opportunités post-alternance.
           </p>
         </div>
         <div

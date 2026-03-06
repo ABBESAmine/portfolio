@@ -1,0 +1,18 @@
+# Amine Abbes — Développeur Full-Stack
+
+> Portfolio de Amine Abbes, développeur full-stack basé à Paris, spécialisé en React, Next.js, Node.js, TypeScript, Three.js et GSAP.
+
+Amine Abbes est en alternance à l'ESPCI Paris (École Supérieure de Physique et de Chimie Industrielles de la Ville de Paris).
+
+## Compétences
+
+React, Next.js, Node.js, TypeScript, JavaScript, HTML, CSS, TailwindCSS, Three.js, GSAP, Supabase
+
+## Expérience
+
+3+ ans d'expérience en développement web full-stack. 10+ projets livrés, du prototype au déploiement en production.
+
+## Contact
+
+- Site : https://amineabb.es
+- Formulaire de contact : https://amineabb.es/#contact

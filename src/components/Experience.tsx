@@ -13,19 +13,19 @@ type ExperienceItem = {
   description: string;
 };
 
-export function Experience() {
+export function Experience({ initialData = [] }: { initialData?: ExperienceItem[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const itemsRef = useRef<(HTMLLIElement | null)[]>([]);
-  const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
+  const [experiences, setExperiences] = useState<ExperienceItem[]>(initialData);
 
   useEffect(() => {
     fetch("/api/experiences")
-      .then((res) => res.ok ? res.json() : [])
-      .then((data: ExperienceItem[]) => {
-        setExperiences(Array.isArray(data) ? data : []);
+      .then((res) => res.ok ? res.json() : null)
+      .then((data: ExperienceItem[] | null) => {
+        if (Array.isArray(data)) setExperiences(data);
       })
-      .catch(() => setExperiences([]));
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
