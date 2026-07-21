@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
 
 const Hero3D = dynamic(() => import("./Hero3D").then((m) => m.Hero3D), {
   ssr: false,
@@ -11,9 +12,16 @@ const Hero3D = dynamic(() => import("./Hero3D").then((m) => m.Hero3D), {
 
 /** Décalage max des blobs en px (souris au bord = ±PARALLAX_STRENGTH/2). Les blobs sont derrière le canvas 3D. */
 const PARALLAX_STRENGTH = 8;
+/** Rayon du halo qui révèle le titre en dégradé. */
+const GLOW_RADIUS = 110;
+/** Facteur de lissage du suivi souris (0 = figé, 1 = collé au curseur). */
+const LERP = 0.12;
 
-type BlobOffset = { x: number; y: number };
-type TitleGlow = { x: number; y: number; active: boolean };
+const BLOB_COEFFS = [
+  { x: 0.8, y: 0.6 },
+  { x: -0.6, y: -0.5 },
+  { x: 0.4, y: 0.4 },
+] as const;
 
 export function Hero() {
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -21,24 +29,70 @@ export function Hero() {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const blob1Ref = useRef<HTMLDivElement>(null);
-  const blob2Ref = useRef<HTMLDivElement>(null);
-  const blob3Ref = useRef<HTMLDivElement>(null);
+  const blobRefs = useRef<(HTMLDivElement | null)[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
   const titleHoverRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const glowInnerRef = useRef<HTMLDivElement>(null);
 
-  const [blobMove, setBlobMove] = useState<{ b1: BlobOffset; b2: BlobOffset; b3: BlobOffset }>({
-    b1: { x: 0, y: 0 },
-    b2: { x: 0, y: 0 },
-    b3: { x: 0, y: 0 },
-  });
-  const [titleGlow, setTitleGlow] = useState<TitleGlow>({ x: 0, y: 0, active: false });
+  // Cibles et valeurs courantes vivent dans des refs : un setState par frame
+  // re-rendrait tout le sous-arbre du Hero, canvas 3D compris.
+  const blobTarget = useRef({ x: 0, y: 0 });
+  const blobCurrent = useRef({ x: 0, y: 0 });
+  const glowTarget = useRef({ x: 0, y: 0 });
+  const frameRef = useRef<number | null>(null);
+
+  // `active` change rarement (entrée/sortie du titre) : React est légitime ici.
+  const [glowActive, setGlowActive] = useState(false);
+  const [glowSize, setGlowSize] = useState({ width: 0, height: 0 });
 
   const words = ["Développeur", "Full-Stack"];
 
+  /** Boucle unique : lisse les cibles et écrit les transforms. Composite pur. */
+  const tick = useCallback(() => {
+    const cur = blobCurrent.current;
+    const tgt = blobTarget.current;
+    cur.x += (tgt.x - cur.x) * LERP;
+    cur.y += (tgt.y - cur.y) * LERP;
+
+    BLOB_COEFFS.forEach((coeff, i) => {
+      const el = blobRefs.current[i];
+      if (!el) return;
+      const x = cur.x * coeff.x;
+      const y = cur.y * coeff.y;
+      // Le 3e blob est centré via translate(-50%, -50%) : on le compose ici
+      // plutôt que de laisser Tailwind poser un transform concurrent.
+      el.style.transform =
+        i === 2
+          ? `translate3d(calc(-50% + ${x}px), calc(-50% + ${y}px), 0)`
+          : `translate3d(${x}px, ${y}px, 0)`;
+    });
+
+    // Le halo : le cercle masqué se déplace, le texte en dégradé qu'il contient
+    // se déplace à l'inverse pour rester aligné sur le titre. Deux transforms,
+    // aucun repaint — contrairement à un mask-image recalculé à chaque frame.
+    const glow = glowRef.current;
+    const inner = glowInnerRef.current;
+    if (glow && inner) {
+      const { x, y } = glowTarget.current;
+      glow.style.transform = `translate3d(${x - GLOW_RADIUS}px, ${y - GLOW_RADIUS}px, 0)`;
+      inner.style.transform = `translate3d(${GLOW_RADIUS - x}px, ${GLOW_RADIUS - y}px, 0)`;
+    }
+
+    const settled =
+      Math.abs(tgt.x - cur.x) < 0.05 && Math.abs(tgt.y - cur.y) < 0.05;
+    frameRef.current = settled ? null : requestAnimationFrame(tick);
+  }, []);
+
+  const schedule = useCallback(() => {
+    if (frameRef.current === null) {
+      frameRef.current = requestAnimationFrame(tick);
+    }
+  }, [tick]);
+
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    if (!section || prefersReducedMotion()) return;
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = section.getBoundingClientRect();
@@ -48,79 +102,98 @@ export function Hero() {
         e.clientY >= rect.top &&
         e.clientY <= rect.bottom;
       if (!inside) {
-        setBlobMove({ b1: { x: 0, y: 0 }, b2: { x: 0, y: 0 }, b3: { x: 0, y: 0 } });
-        return;
+        blobTarget.current = { x: 0, y: 0 };
+      } else {
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        blobTarget.current = {
+          x: x * PARALLAX_STRENGTH,
+          y: y * PARALLAX_STRENGTH,
+        };
       }
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      const dx = x * PARALLAX_STRENGTH;
-      const dy = y * PARALLAX_STRENGTH;
-      setBlobMove({
-        b1: { x: dx * 0.8, y: dy * 0.6 },
-        b2: { x: -dx * 0.6, y: -dy * 0.5 },
-        b3: { x: dx * 0.4, y: dy * 0.4 },
-      });
+      schedule();
     };
 
-    window.addEventListener("mousemove", onMouseMove);
-    return () => window.removeEventListener("mousemove", onMouseMove);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    };
+  }, [schedule]);
+
+  // Le calque du halo doit avoir exactement les dimensions du titre pour que le
+  // texte en dégradé se superpose au pixel près.
+  useEffect(() => {
+    const el = titleHoverRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setGlowSize({ width, height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const handleTitleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion()) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    setTitleGlow({
+    glowTarget.current = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
-      active: true,
-    });
+    };
+    if (!glowActive) setGlowActive(true);
+    schedule();
   };
 
-  const handleTitleLeave = () => {
-    setTitleGlow((prev) => ({ ...prev, active: false }));
-  };
+  const handleTitleLeave = () => setGlowActive(false);
 
   useEffect(() => {
+    if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        blob1Ref.current,
-        { scale: 0.8, x: -50, opacity: 0 },
-        { scale: 1, x: 0, opacity: 0.4, duration: 1.2, ease: "power2.out", delay: 0.2 }
-      );
-      gsap.fromTo(
-        blob2Ref.current,
-        { scale: 0.8, x: 50, opacity: 0 },
-        { scale: 1, x: 0, opacity: 0.35, duration: 1.2, ease: "power2.out", delay: 0.4 }
-      );
-      gsap.fromTo(
-        blob3Ref.current,
-        { scale: 0.6, opacity: 0 },
-        { scale: 1, opacity: 0.3, duration: 1, ease: "power2.out", delay: 0.6 }
-      );
+      // Opacité uniquement : le `transform` des blobs appartient à la boucle
+      // rAF de la parallaxe, GSAP ne doit pas y toucher.
+      blobRefs.current.forEach((el, i) => {
+        if (!el) return;
+        gsap.fromTo(
+          el,
+          { opacity: 0 },
+          { opacity: 0.35, duration: 0.6, ease: "expo.out", delay: i * 0.05 }
+        );
+      });
       wordRefs.current.forEach((el, i) => {
         gsap.fromTo(
           el,
-          { y: 80, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.9, ease: "power3.out", delay: 0.3 + i * 0.15 }
+          { y: 16, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.4,
+            ease: "expo.out",
+            delay: 0.05 + i * 0.06,
+          }
         );
       });
       gsap.fromTo(
         subtitleRef.current,
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, ease: "power2.out", delay: 0.8 }
+        { y: 12, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.35, ease: "expo.out", delay: 0.25 }
       );
       gsap.fromTo(
         ctaRef.current,
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.5, delay: 1 }
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.3, ease: "expo.out", delay: 0.35 }
       );
       gsap.fromTo(
         scrollRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.5, delay: 1.4 }
+        { opacity: 1, duration: 0.3, delay: 0.5 }
       );
     });
     return () => ctx.revert();
   }, []);
+
+  const glowTextClass =
+    "font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight";
 
   return (
     <section
@@ -146,21 +219,25 @@ export function Hero() {
         </Suspense>
       </div>
 
-      {/* Halos (blobs) — même structure que amineabb.es : pas de wrapper, position sur la div .blob */}
+      {/* Halos (blobs) — déplacés par la boucle rAF, jamais par React */}
       <div
-        ref={blob1Ref}
-        className="blob w-[400px] h-[400px] bg-heading -top-40 -right-40 lg:top-1/4 lg:right-1/4 transition-transform duration-200 ease-out"
-        style={{ transform: `translate(${blobMove.b1.x}px, ${blobMove.b1.y}px)` }}
+        ref={(el) => {
+          blobRefs.current[0] = el;
+        }}
+        className="blob w-[400px] h-[400px] bg-heading -top-40 -right-40 lg:top-1/4 lg:right-1/4"
       />
       <div
-        ref={blob2Ref}
-        className="blob w-[320px] h-[320px] bg-accent bottom-20 -left-32 lg:bottom-1/4 lg:left-1/4 transition-transform duration-200 ease-out"
-        style={{ transform: `translate(${blobMove.b2.x}px, ${blobMove.b2.y}px)` }}
+        ref={(el) => {
+          blobRefs.current[1] = el;
+        }}
+        className="blob w-[320px] h-[320px] bg-accent bottom-20 -left-32 lg:bottom-1/4 lg:left-1/4"
       />
       <div
-        ref={blob3Ref}
-        className="blob w-[280px] h-[280px] bg-primary top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-200 ease-out"
-        style={{ transform: `translate(calc(-50% + ${blobMove.b3.x}px), calc(-50% + ${blobMove.b3.y}px))` }}
+        ref={(el) => {
+          blobRefs.current[2] = el;
+        }}
+        className="blob w-[280px] h-[280px] bg-primary top-1/2 left-1/2"
+        style={{ transform: "translate3d(-50%, -50%, 0)" }}
       />
 
       <div className="relative z-10 text-center max-w-4xl">
@@ -173,7 +250,7 @@ export function Hero() {
         >
           <h1
             ref={titleRef}
-            className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-foreground"
+            className={`${glowTextClass} text-foreground`}
           >
             {words.map((word, i) => (
               <span
@@ -188,26 +265,45 @@ export function Hero() {
             ))}
           </h1>
 
+          {/* Fenêtre circulaire masquée : le masque est statique (calculé une
+              fois), seul le transform bouge. */}
           <div
             aria-hidden
-            className={`pointer-events-none absolute inset-0 font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight transition-opacity duration-150 ${
-              titleGlow.active ? "opacity-100" : "opacity-0"
+            className={`pointer-events-none absolute left-0 top-0 overflow-hidden transition-opacity duration-150 ease-out-strong ${
+              glowActive ? "opacity-100" : "opacity-0"
             }`}
+            ref={glowRef}
             style={{
-              color: "transparent",
-              WebkitTextFillColor: "transparent",
-              backgroundImage: "linear-gradient(135deg, var(--heading) 0%, var(--red) 50%, var(--accent) 100%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              WebkitMaskImage: `radial-gradient(110px circle at ${titleGlow.x}px ${titleGlow.y}px, black 0%, black 55%, transparent 100%)`,
-              maskImage: `radial-gradient(110px circle at ${titleGlow.x}px ${titleGlow.y}px, black 0%, black 55%, transparent 100%)`,
+              width: GLOW_RADIUS * 2,
+              height: GLOW_RADIUS * 2,
+              willChange: "transform",
+              WebkitMaskImage:
+                "radial-gradient(closest-side, #000 0%, #000 55%, transparent 100%)",
+              maskImage:
+                "radial-gradient(closest-side, #000 0%, #000 55%, transparent 100%)",
             }}
           >
-            {words.map((word) => (
-              <span key={`glow-${word}`} className="block">
-                {word}
-              </span>
-            ))}
+            <div
+              ref={glowInnerRef}
+              className={`${glowTextClass} absolute left-0 top-0 text-center`}
+              style={{
+                width: glowSize.width || undefined,
+                height: glowSize.height || undefined,
+                willChange: "transform",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+                backgroundImage:
+                  "linear-gradient(135deg, var(--heading) 0%, var(--red) 50%, var(--accent) 100%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+              }}
+            >
+              {words.map((word) => (
+                <span key={`glow-${word}`} className="block">
+                  {word}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         <p
@@ -219,13 +315,13 @@ export function Hero() {
         <div ref={ctaRef} className="mt-10 flex flex-wrap gap-4 justify-center">
           <a
             href="#projects"
-            className="px-8 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-hover transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
+            className="px-8 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-hover hover:scale-105 active:scale-[0.97] hover:shadow-lg hover:shadow-primary/30 transition-[transform,background-color] duration-150 ease-out-strong"
           >
             Voir mes projets
           </a>
           <a
             href="#contact"
-            className="px-8 py-3.5 rounded-full border-2 border-heading text-heading font-medium hover:bg-heading hover:text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+            className="px-8 py-3.5 rounded-full border-2 border-heading text-heading font-medium hover:bg-heading hover:text-white hover:scale-[1.02] active:scale-[0.97] hover:shadow-md transition-[transform,background-color,color] duration-150 ease-out-strong"
           >
             Me contacter
           </a>

@@ -28,7 +28,7 @@ export function Contact() {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
-            toggleActions: "play none none reverse",
+            once: true,
           },
         }
       );
@@ -42,7 +42,7 @@ export function Contact() {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
-            toggleActions: "play none none reverse",
+            once: true,
           },
           delay: 0.15,
         }
@@ -192,17 +192,19 @@ export function Contact() {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full px-6 py-4 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover disabled:opacity-50 transition-all hover:scale-[1.02]"
+              className="w-full px-6 py-4 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98] transition-[transform,background-color,opacity] duration-150 ease-out-strong"
             >
-              {status === "loading" ? "Envoi..." : "Envoyer"}
+              <span className="btn-label" data-loading={status === "loading"}>
+                {status === "loading" ? "Envoi..." : "Envoyer"}
+              </span>
             </button>
             {status === "success" && (
-              <p className="text-center text-green-600 dark:text-green-400 text-sm">
+              <p className="form-status text-center text-green-600 dark:text-green-400 text-sm">
                 Message envoyé avec succès.
               </p>
             )}
             {status === "error" && (
-              <p className="text-center text-red-600 dark:text-red-400 text-sm">
+              <p className="form-status text-center text-red-600 dark:text-red-400 text-sm">
                 Erreur lors de l&apos;envoi. Réessayez.
               </p>
             )}

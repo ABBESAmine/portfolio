@@ -1,30 +1,33 @@
 "use client";
 
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import * as THREE from "three";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
 
 function Scene({ mouseTarget }: { mouseTarget: MutableRefObject<THREE.Vector2> }) {
-  const groupRef = useRef<THREE.Group>(null);
+  // Uniquement le suivi souris : le groupe s'incline dans les limites du lerp
+  // et revient au repos. Pas de rotation continue — les <Float> suffisent à
+  // garder la scène vivante.
+  const mouseRef = useRef<THREE.Group>(null);
 
-  useFrame((_, delta) => {
-    if (!groupRef.current) return;
-    groupRef.current.rotation.y += delta * 0.12;
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(
-      groupRef.current.rotation.x,
+  useFrame(() => {
+    if (!mouseRef.current) return;
+    mouseRef.current.rotation.x = THREE.MathUtils.lerp(
+      mouseRef.current.rotation.x,
       mouseTarget.current.y * 0.08,
       0.05
     );
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
+    mouseRef.current.rotation.y = THREE.MathUtils.lerp(
+      mouseRef.current.rotation.y,
       mouseTarget.current.x * 0.12,
       0.05
     );
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={mouseRef}>
       <ambientLight intensity={0.9} />
       <directionalLight position={[5, 5, 5]} intensity={1.2} />
       <pointLight position={[-3, 2, 2]} intensity={0.8} color="#0B6E4F" />
@@ -104,8 +107,28 @@ function Scene({ mouseTarget }: { mouseTarget: MutableRefObject<THREE.Vector2> }
 function Hero3D() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseTarget = useRef(new THREE.Vector2(0, 0));
+  const [visible, setVisible] = useState(true);
+  const [animate, setAnimate] = useState(true);
 
   useEffect(() => {
+    setAnimate(!prefersReducedMotion());
+  }, []);
+
+  // Sans ça, la scène continue de rendre à 60 fps quand le Hero est à plusieurs
+  // écrans de distance : GPU et batterie brûlés sur ~90 % de la visite.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { rootMargin: "100px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible || !animate) return;
     const onMouseMove = (e: MouseEvent) => {
       const container = containerRef.current;
       if (!container) return;
@@ -123,7 +146,7 @@ function Hero3D() {
 
     window.addEventListener("mousemove", onMouseMove);
     return () => window.removeEventListener("mousemove", onMouseMove);
-  }, []);
+  }, [visible, animate]);
 
   return (
     <div ref={containerRef} className="absolute inset-0 w-full h-full">
@@ -132,6 +155,7 @@ function Hero3D() {
         camera={{ position: [0, 0, 3.7], fov: 50 }}
         dpr={[1, 1.5]}
         gl={{ alpha: true, antialias: true }}
+        frameloop={visible && animate ? "always" : "demand"}
       >
         <Scene mouseTarget={mouseTarget} />
       </Canvas>

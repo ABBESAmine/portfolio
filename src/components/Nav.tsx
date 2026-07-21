@@ -18,21 +18,28 @@ const sections = [
 ];
 
 function BurgerIcon({ open }: { open: boolean }) {
+  // Les trois barres sont centrées en absolu sur le même axe et écartées par
+  // translate. À l'ouverture elles reviennent toutes à 0 : les deux diagonales
+  // se croisent donc exactement au centre, quelle que soit la taille de l'icône.
+  const bar =
+    "absolute left-0 h-0.5 w-full rounded-full bg-current top-[calc(50%-1px)]";
   return (
-    <span className="relative flex h-5 w-6 flex-col justify-between" aria-hidden>
+    <span className="relative block h-5 w-6" aria-hidden>
       <span
-        className={`block h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
-          open ? "translate-y-2 rotate-45" : ""
+        className={`${bar} transition-transform duration-200 ease-out-strong ${
+          open ? "rotate-45" : "-translate-y-[6px]"
+        }`}
+      />
+      {/* scale-x-50 et non scale-x-0 : rien ne disparaît en devenant de
+          largeur nulle. */}
+      <span
+        className={`${bar} transition-[transform,opacity] duration-200 ease-out-strong ${
+          open ? "opacity-0 scale-x-50" : ""
         }`}
       />
       <span
-        className={`block h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
-          open ? "opacity-0 scale-x-0" : ""
-        }`}
-      />
-      <span
-        className={`block h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
-          open ? "-translate-y-2 -rotate-45" : ""
+        className={`${bar} transition-transform duration-200 ease-out-strong ${
+          open ? "-rotate-45" : "translate-y-[6px]"
         }`}
       />
     </span>
@@ -81,7 +88,8 @@ export function Nav() {
 
   const closeMobile = () => setMobileOpen(false);
 
-  const linkBase = "text-sm font-medium transition-all duration-300 block";
+  const linkBase =
+    "text-sm font-medium block transition-[color,transform] duration-200 ease-out-strong active:scale-[0.97]";
   const linkActive = "text-heading";
   const linkInactive = "text-muted hover:text-heading";
 
@@ -155,7 +163,7 @@ export function Nav() {
             <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-heading/30"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-heading/30 active:scale-[0.94] transition-[transform,background-color] duration-150 ease-out-strong"
             aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={mobileOpen}
             >
@@ -167,8 +175,10 @@ export function Nav() {
         {/* Panneau menu mobile */}
         <div
           ref={mobileMenuRef}
-          className={`absolute left-0 right-0 top-[49px] border-b border-border bg-background/98 backdrop-blur-md shadow-lg transition-all duration-300 ease-out lg:hidden ${
-            mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
+          className={`absolute left-0 right-0 top-full origin-top border-b border-border bg-background/98 backdrop-blur-md shadow-lg transition-[opacity,transform] ease-out-strong lg:hidden ${
+            mobileOpen
+              ? "opacity-100 translate-y-0 scale-100 duration-200"
+              : "opacity-0 -translate-y-2 scale-[0.98] pointer-events-none duration-150"
           }`}
           aria-hidden={!mobileOpen}
         >
@@ -184,7 +194,7 @@ export function Nav() {
         {mobileOpen && (
           <button
             type="button"
-            className="fixed inset-0 top-[49px] z-[-1] bg-black/20 lg:hidden"
+            className="fixed inset-0 z-[-1] bg-black/20 lg:hidden"
             onClick={closeMobile}
             aria-label="Fermer le menu"
           />

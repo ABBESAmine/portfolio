@@ -40,25 +40,23 @@ export function Experience({ initialData = [] }: { initialData?: ExperienceItem[
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
-            toggleActions: "play none none reverse",
+            once: true,
           },
         }
       );
-      itemsRef.current.forEach((el, i) => {
+      itemsRef.current.forEach((el) => {
         if (!el) return;
+        // Chaque item se déclenche à son propre passage dans le viewport :
+        // pas de delay indexé, sinon les derniers attendent sans raison.
         gsap.fromTo(
           el,
-          { x: -50, opacity: 0 },
+          { x: -24, opacity: 0 },
           {
             x: 0,
             opacity: 1,
-            duration: 0.6,
-            scrollTrigger: {
-              trigger: el,
-              start: "top 88%",
-              toggleActions: "play none none reverse",
-            },
-            delay: i * 0.1,
+            duration: 0.45,
+            ease: "expo.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
           }
         );
       });

@@ -42,29 +42,28 @@ export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) 
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
-            toggleActions: "play none none reverse",
+            once: true,
           },
         }
       );
-      cellsRef.current.forEach((el, i) => {
-        if (!el) return;
-        gsap.fromTo(
-          el,
-          { y: 50, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.5,
-            stagger: 0.08,
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-              toggleActions: "play none none reverse",
-            },
-            delay: i * 0.08,
-          }
-        );
-      });
+      // Un seul tween sur l'ensemble : le `stagger` n'a aucun effet sur un
+      // élément isolé, le décalage venait en réalité du `delay` dupliqué.
+      gsap.fromTo(
+        cellsRef.current.filter(Boolean) as HTMLElement[],
+        { y: 24, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.45,
+          ease: "expo.out",
+          stagger: 0.05,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            once: true,
+          },
+        }
+      );
     }, sectionRef);
     return () => ctx.revert();
   }, [projects]);
@@ -99,7 +98,7 @@ export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) 
               }}
               href={featured!.link}
               as="a"
-              className="md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] group min-h-[280px] md:min-h-0"
+              className="md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] duration-150 ease-out-strong group min-h-[280px] md:min-h-0"
             >
               <h3 className="font-display text-2xl md:text-3xl font-bold gradient-text">
                 {featured!.title}
@@ -115,7 +114,7 @@ export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) 
                 }}
                 href={project.link}
                 as="a"
-                className="block p-6 md:p-7 rounded-2xl bg-card border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] group min-h-[200px]"
+                className="block p-6 md:p-7 rounded-2xl bg-card border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] duration-150 ease-out-strong group min-h-[200px]"
               >
                 <h3 className="font-display text-xl font-bold gradient-text">
                   {project.title}

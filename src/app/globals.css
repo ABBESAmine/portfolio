@@ -18,6 +18,11 @@
   --card: #EDE8E0;
   --card-hover: #e6e0d6;
   --on-dark: #FFFFFF;
+
+  /* Courbes d'easing : les défauts CSS sont trop mous pour de l'UI */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* Thème sombre : mêmes accents, fonds foncés */
@@ -49,7 +54,12 @@
 html {
   width: 100%;
   overflow-x: hidden;
-  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -100,12 +110,17 @@ h2::after {
   background-clip: text;
 }
 
+/* Halo diffus sans filter: blur() — un masque radial donne le même dégradé
+   pour un coût de rendu quasi nul, et il n'est calculé qu'une fois (l'élément
+   ne bouge ensuite qu'en transform, donc en composite pur). */
 .blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.2;
+  opacity: 0.35;
   pointer-events: none;
+  will-change: transform;
+  -webkit-mask-image: radial-gradient(closest-side, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
 }
 
 .scroll-progress {
@@ -172,6 +187,39 @@ a[href].text-heading:hover {
   opacity: 0.9;
 }
 
+/* Apparition des messages de statut (formulaire de contact) */
+.form-status {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+@starting-style {
+  .form-status {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* Crossfade des icônes du toggle de thème */
+.theme-icon {
+  grid-area: 1 / 1;
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.theme-icon[data-active="false"] {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.8);
+}
+
+/* Crossfade du label du bouton submit pendant le chargement.
+   Le flou masque le fait qu'on voit deux textes se substituer. */
+.btn-label {
+  transition: filter 200ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+.btn-label[data-loading="true"] {
+  filter: blur(2px);
+  opacity: 0.7;
+}
+
 .pattern-border-bottom {
   position: relative;
 }
@@ -191,4 +239,17 @@ a[href].text-heading:hover {
     transparent 100%
   );
   opacity: 0.85;
+}
+
+/* Motion réduit : on retire les déplacements, on garde les fondus et les
+   transitions de couleur qui aident à la compréhension. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

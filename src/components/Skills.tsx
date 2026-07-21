@@ -33,7 +33,7 @@ export function Skills({ initialData = [] }: { initialData?: { name: string }[] 
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
-            toggleActions: "play none none reverse",
+            once: true,
           },
         }
       );
@@ -48,7 +48,7 @@ export function Skills({ initialData = [] }: { initialData?: { name: string }[] 
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
-            toggleActions: "play none none reverse",
+            once: true,
           },
         }
       );
@@ -79,7 +79,7 @@ export function Skills({ initialData = [] }: { initialData?: { name: string }[] 
           {skills.map((name) => (
             <span
               key={name}
-              className="skill-badge shrink-0 px-4 py-3 rounded-xl bg-card border border-border text-foreground font-medium text-sm text-center hover:bg-card-hover hover:border-heading/40 hover:text-heading transition-all duration-300"
+              className="skill-badge shrink-0 px-4 py-3 rounded-xl bg-card border border-border text-foreground font-medium text-sm text-center hover:bg-card-hover hover:border-heading/40 hover:text-heading transition-[background-color,border-color,color] duration-150 ease-out-strong"
             >
               {name}
             </span>
