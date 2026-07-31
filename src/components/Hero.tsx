@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { LERP, duration, gsapEase, sec, stagger } from "@/lib/motion";
 
 const Hero3D = dynamic(() => import("./Hero3D").then((m) => m.Hero3D), {
   ssr: false,
@@ -14,8 +15,6 @@ const Hero3D = dynamic(() => import("./Hero3D").then((m) => m.Hero3D), {
 const PARALLAX_STRENGTH = 8;
 /** Rayon du halo qui révèle le titre en dégradé. */
 const GLOW_RADIUS = 110;
-/** Facteur de lissage du suivi souris (0 = figé, 1 = collé au curseur). */
-const LERP = 0.12;
 
 const BLOB_COEFFS = [
   { x: 0.8, y: 0.6 },
@@ -40,6 +39,7 @@ export function Hero() {
   const blobTarget = useRef({ x: 0, y: 0 });
   const blobCurrent = useRef({ x: 0, y: 0 });
   const glowTarget = useRef({ x: 0, y: 0 });
+  const glowCurrent = useRef({ x: 0, y: 0 });
   const frameRef = useRef<number | null>(null);
 
   // `active` change rarement (entrée/sortie du titre) : React est légitime ici.
@@ -47,6 +47,15 @@ export function Hero() {
   const [glowSize, setGlowSize] = useState({ width: 0, height: 0 });
 
   const words = ["Développeur", "Full-Stack"];
+
+  /** Applique `will-change` aux seuls calques que la boucle déplace. */
+  const setWillChange = useCallback((value: "transform" | "auto") => {
+    blobRefs.current.forEach((el) => {
+      if (el) el.style.willChange = value;
+    });
+    if (glowRef.current) glowRef.current.style.willChange = value;
+    if (glowInnerRef.current) glowInnerRef.current.style.willChange = value;
+  }, []);
 
   /** Boucle unique : lisse les cibles et écrit les transforms. Composite pur. */
   const tick = useCallback(() => {
@@ -71,24 +80,43 @@ export function Hero() {
     // Le halo : le cercle masqué se déplace, le texte en dégradé qu'il contient
     // se déplace à l'inverse pour rester aligné sur le titre. Deux transforms,
     // aucun repaint — contrairement à un mask-image recalculé à chaque frame.
+    // Il est lissé au même LERP que les blobs : collé au curseur il paraissait
+    // artificiel, et son immobilité tranchait avec l'inertie des halos.
+    const glowCur = glowCurrent.current;
+    const glowTgt = glowTarget.current;
+    glowCur.x += (glowTgt.x - glowCur.x) * LERP;
+    glowCur.y += (glowTgt.y - glowCur.y) * LERP;
+
     const glow = glowRef.current;
     const inner = glowInnerRef.current;
     if (glow && inner) {
-      const { x, y } = glowTarget.current;
+      const { x, y } = glowCur;
       glow.style.transform = `translate3d(${x - GLOW_RADIUS}px, ${y - GLOW_RADIUS}px, 0)`;
       inner.style.transform = `translate3d(${GLOW_RADIUS - x}px, ${GLOW_RADIUS - y}px, 0)`;
     }
 
+    // Le halo fait partie du test : sans ça la boucle s'arrêterait dès que les
+    // blobs sont posés, en laissant le halo à mi-chemin de sa cible.
     const settled =
-      Math.abs(tgt.x - cur.x) < 0.05 && Math.abs(tgt.y - cur.y) < 0.05;
-    frameRef.current = settled ? null : requestAnimationFrame(tick);
-  }, []);
+      Math.abs(tgt.x - cur.x) < 0.05 &&
+      Math.abs(tgt.y - cur.y) < 0.05 &&
+      Math.abs(glowTgt.x - glowCur.x) < 0.05 &&
+      Math.abs(glowTgt.y - glowCur.y) < 0.05;
+
+    if (settled) {
+      frameRef.current = null;
+      setWillChange("auto");
+    } else {
+      frameRef.current = requestAnimationFrame(tick);
+    }
+  }, [setWillChange]);
 
   const schedule = useCallback(() => {
     if (frameRef.current === null) {
+      setWillChange("transform");
       frameRef.current = requestAnimationFrame(tick);
     }
-  }, [tick]);
+  }, [tick, setWillChange]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -141,7 +169,13 @@ export function Hero() {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     };
-    if (!glowActive) setGlowActive(true);
+    if (!glowActive) {
+      // À l'entrée, le halo se pose sous le curseur : le lisser depuis sa
+      // dernière position le ferait traverser le titre en diagonale pendant
+      // qu'il apparaît en fondu.
+      glowCurrent.current = { ...glowTarget.current };
+      setGlowActive(true);
+    }
     schedule();
   };
 
@@ -157,7 +191,12 @@ export function Hero() {
         gsap.fromTo(
           el,
           { opacity: 0 },
-          { opacity: 0.35, duration: 0.6, ease: "expo.out", delay: i * 0.05 }
+          {
+            opacity: 0.35,
+            duration: sec(duration.entrance),
+            ease: gsapEase.out,
+            delay: i * stagger.tight,
+          }
         );
       });
       wordRefs.current.forEach((el, i) => {
@@ -167,26 +206,38 @@ export function Hero() {
           {
             y: 0,
             opacity: 1,
-            duration: 0.4,
-            ease: "expo.out",
-            delay: 0.05 + i * 0.06,
+            duration: sec(duration.reveal),
+            ease: gsapEase.out,
+            delay: stagger.tight + i * stagger.loose,
           }
         );
       });
       gsap.fromTo(
         subtitleRef.current,
         { y: 12, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.35, ease: "expo.out", delay: 0.25 }
+        {
+          y: 0,
+          opacity: 1,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
+          delay: 0.25,
+        }
       );
       gsap.fromTo(
         ctaRef.current,
         { y: 10, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.3, ease: "expo.out", delay: 0.35 }
+        {
+          y: 0,
+          opacity: 1,
+          duration: sec(duration.slow),
+          ease: gsapEase.out,
+          delay: 0.35,
+        }
       );
       gsap.fromTo(
         scrollRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.3, delay: 0.5 }
+        { opacity: 1, duration: sec(duration.slow), delay: 0.5 }
       );
     });
     return () => ctx.revert();
@@ -269,14 +320,13 @@ export function Hero() {
               fois), seul le transform bouge. */}
           <div
             aria-hidden
-            className={`pointer-events-none absolute left-0 top-0 overflow-hidden transition-opacity duration-150 ease-out-strong ${
+            className={`pointer-events-none absolute left-0 top-0 overflow-hidden transition-opacity duration-fast ease-out-strong ${
               glowActive ? "opacity-100" : "opacity-0"
             }`}
             ref={glowRef}
             style={{
               width: GLOW_RADIUS * 2,
               height: GLOW_RADIUS * 2,
-              willChange: "transform",
               WebkitMaskImage:
                 "radial-gradient(closest-side, #000 0%, #000 55%, transparent 100%)",
               maskImage:
@@ -289,7 +339,6 @@ export function Hero() {
               style={{
                 width: glowSize.width || undefined,
                 height: glowSize.height || undefined,
-                willChange: "transform",
                 color: "transparent",
                 WebkitTextFillColor: "transparent",
                 backgroundImage:
@@ -315,13 +364,13 @@ export function Hero() {
         <div ref={ctaRef} className="mt-10 flex flex-wrap gap-4 justify-center">
           <a
             href="#projects"
-            className="px-8 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-hover hover:scale-105 active:scale-[0.97] hover:shadow-lg hover:shadow-primary/30 transition-[transform,background-color] duration-150 ease-out-strong"
+            className="hover-glow hover-glow-primary px-8 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.97] transition-[transform,background-color] duration-fast ease-out-strong"
           >
             Voir mes projets
           </a>
           <a
             href="#contact"
-            className="px-8 py-3.5 rounded-full border-2 border-heading text-heading font-medium hover:bg-heading hover:text-white hover:scale-[1.02] active:scale-[0.97] hover:shadow-md transition-[transform,background-color,color] duration-150 ease-out-strong"
+            className="hover-glow hover-glow-heading px-8 py-3.5 rounded-full border-2 border-heading text-heading font-medium hover:bg-heading hover:text-white hover:scale-[1.02] active:scale-[0.97] transition-[transform,background-color,color] duration-fast ease-out-strong"
           >
             Me contacter
           </a>
