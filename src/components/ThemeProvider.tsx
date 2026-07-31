@@ -86,7 +86,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="grid h-9 w-9 place-items-center rounded-lg text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-heading/30 active:scale-[0.94] transition-[transform,background-color] duration-150 ease-out-strong"
+      className="grid h-9 w-9 place-items-center rounded-lg text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-heading/30 active:scale-[0.94] transition-[transform,background-color] duration-press ease-out-strong"
       aria-label={theme === "dark" ? "Passer au thème clair" : "Passer au thème sombre"}
       title={theme === "dark" ? "Thème clair" : "Thème sombre"}
     >
