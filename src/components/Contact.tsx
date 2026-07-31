@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { GITHUB_URL, LINKEDIN_URL } from "@/lib/config";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { duration, gsapEase, revealFrom, sec } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,14 +19,16 @@ export function Contact() {
   );
 
   useEffect(() => {
+    const reduced = prefersReducedMotion();
     const ctx = gsap.context(() => {
       gsap.fromTo(
         leftRef.current,
-        { x: -40, opacity: 0 },
+        revealFrom({ x: -40 }, reduced),
         {
           x: 0,
           opacity: 1,
-          duration: 0.7,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
@@ -34,11 +38,12 @@ export function Contact() {
       );
       gsap.fromTo(
         formRef.current,
-        { x: 40, opacity: 0 },
+        revealFrom({ x: 40 }, reduced),
         {
           x: 0,
           opacity: 1,
-          duration: 0.7,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
@@ -109,7 +114,7 @@ export function Contact() {
                     href={GITHUB_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-muted hover:text-heading transition-colors"
+                    className="flex items-center gap-2 text-sm text-muted hover:text-heading transition-colors duration-fast ease-out-strong"
                     aria-label="GitHub"
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0" aria-hidden>
@@ -123,7 +128,7 @@ export function Contact() {
                     href={LINKEDIN_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-muted hover:text-heading transition-colors"
+                    className="flex items-center gap-2 text-sm text-muted hover:text-heading transition-colors duration-fast ease-out-strong"
                     aria-label="LinkedIn"
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0" aria-hidden>
@@ -153,7 +158,7 @@ export function Contact() {
                 name="name"
                 type="text"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                 placeholder="Votre nom"
               />
             </div>
@@ -169,7 +174,7 @@ export function Contact() {
                 name="email"
                 type="email"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                 placeholder="vous@exemple.com"
               />
             </div>
@@ -185,14 +190,14 @@ export function Contact() {
                 name="message"
                 required
                 rows={4}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none transition-shadow"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none"
                 placeholder="Votre message..."
               />
             </div>
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full px-6 py-4 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98] transition-[transform,background-color,opacity] duration-150 ease-out-strong"
+              className="hover-glow hover-glow-primary w-full px-6 py-4 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98] transition-[transform,background-color,opacity] duration-fast ease-out-strong"
             >
               <span className="btn-label" data-loading={status === "loading"}>
                 {status === "loading" ? "Envoi..." : "Envoyer"}
