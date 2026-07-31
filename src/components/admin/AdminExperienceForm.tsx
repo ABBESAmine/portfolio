@@ -82,7 +82,7 @@ export function AdminExperienceForm({ token, items, onRefresh }: AdminExperience
                   type="button"
                   onClick={() => handleDelete(exp.id)}
                   disabled={deletingId === exp.id}
-                  className="text-xs text-red-600 dark:text-red-400 hover:underline disabled:opacity-50 shrink-0"
+                  className="text-xs text-red-600 dark:text-red-400 hover:underline disabled:opacity-50 inline-block active:scale-[0.94] transition-transform duration-press ease-out-strong shrink-0"
                   aria-label={`Supprimer ${exp.role}`}
                 >
                   {deletingId === exp.id ? "…" : "Supprimer"}
@@ -145,7 +145,7 @@ export function AdminExperienceForm({ token, items, onRefresh }: AdminExperience
         <button
           type="submit"
           disabled={status === "loading"}
-          className="px-4 py-2 rounded-xl bg-heading text-white font-medium hover:opacity-90 disabled:opacity-50"
+          className="px-4 py-2 rounded-xl bg-heading text-white font-medium hover:opacity-90 disabled:opacity-50 active:scale-[0.97] transition-transform duration-press ease-out-strong"
         >
           {status === "loading" ? "Ajout..." : "Ajouter l'expérience"}
         </button>

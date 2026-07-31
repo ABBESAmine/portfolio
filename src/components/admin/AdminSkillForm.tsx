@@ -72,7 +72,7 @@ export function AdminSkillForm({ token, items, onRefresh }: AdminSkillFormProps)
                   type="button"
                   onClick={() => handleDelete(skill.id)}
                   disabled={deletingId === skill.id}
-                  className="text-xs text-red-600 dark:text-red-400 hover:underline disabled:opacity-50"
+                  className="text-xs text-red-600 dark:text-red-400 hover:underline disabled:opacity-50 inline-block active:scale-[0.94] transition-transform duration-press ease-out-strong"
                   aria-label={`Supprimer ${skill.name}`}
                 >
                   {deletingId === skill.id ? "…" : "Supprimer"}
@@ -101,7 +101,7 @@ export function AdminSkillForm({ token, items, onRefresh }: AdminSkillFormProps)
         <button
           type="submit"
           disabled={status === "loading"}
-          className="px-4 py-2 rounded-xl bg-heading text-white font-medium hover:opacity-90 disabled:opacity-50"
+          className="px-4 py-2 rounded-xl bg-heading text-white font-medium hover:opacity-90 disabled:opacity-50 active:scale-[0.97] transition-transform duration-press ease-out-strong"
         >
           {status === "loading" ? "Ajout..." : "Ajouter"}
         </button>

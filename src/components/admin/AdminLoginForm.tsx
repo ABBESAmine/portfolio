@@ -61,7 +61,7 @@ export function AdminLoginForm({
           <button
             type="submit"
             disabled={authLoading}
-            className="w-full px-4 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover disabled:opacity-50"
+            className="w-full px-4 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover disabled:opacity-50 active:scale-[0.97] transition-transform duration-press ease-out-strong"
           >
             {authLoading ? "Connexion..." : "Se connecter"}
           </button>
