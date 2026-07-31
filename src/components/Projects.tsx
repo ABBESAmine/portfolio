@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TiltCard } from "@/components/TiltCard";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { duration, gsapEase, revealFrom, sec, stagger } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,14 +33,26 @@ export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) 
   }, []);
 
   useEffect(() => {
+    const reduced = prefersReducedMotion();
+    const cells = cellsRef.current.filter(Boolean) as HTMLElement[];
+
+    // GSAP et TiltCard écrivent tous deux sur `transform`. Le marqueur dit au
+    // tilt de ne pas y toucher tant que l'apparition n'est pas terminée :
+    // survoler une carte en cours de reveal la faisait sauter à sa position
+    // finale.
+    cells.forEach((el) => {
+      el.dataset.revealing = "";
+    });
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         titleRef.current,
-        { y: 40, opacity: 0 },
+        revealFrom({ y: 40 }, reduced),
         {
           y: 0,
           opacity: 1,
-          duration: 0.7,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
@@ -49,18 +63,26 @@ export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) 
       // Un seul tween sur l'ensemble : le `stagger` n'a aucun effet sur un
       // élément isolé, le décalage venait en réalité du `delay` dupliqué.
       gsap.fromTo(
-        cellsRef.current.filter(Boolean) as HTMLElement[],
-        { y: 24, opacity: 0 },
+        cells,
+        revealFrom({ y: 24 }, reduced),
         {
           y: 0,
           opacity: 1,
-          duration: 0.45,
-          ease: "expo.out",
-          stagger: 0.05,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
+          stagger: stagger.tight,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 70%",
             once: true,
+          },
+          onComplete: () => {
+            // GSAP laisse un `transform: translate(0px, 0px)` inline : on le
+            // nettoie avant de rendre la main au tilt.
+            gsap.set(cells, { clearProps: "transform" });
+            cells.forEach((el) => {
+              delete el.dataset.revealing;
+            });
           },
         }
       );
@@ -98,7 +120,7 @@ export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) 
               }}
               href={featured!.link}
               as="a"
-              className="md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] duration-150 ease-out-strong group min-h-[280px] md:min-h-0"
+              className="hover-glow hover-glow-heading md:row-span-2 block p-8 rounded-3xl bg-card bg-gradient-to-br from-heading/15 via-accent/10 to-primary/10 border border-border hover:border-heading/50 transition-[border-color] duration-fast ease-out-strong group min-h-[280px] md:min-h-0"
             >
               <h3 className="font-display text-2xl md:text-3xl font-bold gradient-text">
                 {featured!.title}
@@ -114,7 +136,7 @@ export function Projects({ initialData = [] }: { initialData?: ProjectItem[] }) 
                 }}
                 href={project.link}
                 as="a"
-                className="block p-6 md:p-7 rounded-2xl bg-card border border-border hover:border-heading/50 hover:shadow-xl hover:shadow-heading/10 transition-[border-color,box-shadow] duration-150 ease-out-strong group min-h-[200px]"
+                className="hover-glow hover-glow-heading block p-6 md:p-7 rounded-2xl bg-card border border-border hover:border-heading/50 transition-[border-color] duration-fast ease-out-strong group min-h-[200px]"
               >
                 <h3 className="font-display text-xl font-bold gradient-text">
                   {project.title}

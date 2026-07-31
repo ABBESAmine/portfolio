@@ -163,11 +163,14 @@ h2::after {
 .hover-glow {
   position: relative;
 }
+/* Pas de `z-index: -1` : il enverrait le calque derrière le fond du parent,
+   voire derrière un ancêtre selon le contexte d'empilement. Inutile de toute
+   façon — une ombre portée n'est jamais peinte sous sa propre border-box, donc
+   elle n'apparaît qu'à l'extérieur de la carte et ne masque aucun contenu. */
 .hover-glow::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
   border-radius: inherit;
   opacity: 0;
   pointer-events: none;
