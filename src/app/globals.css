@@ -19,11 +19,15 @@
   --card-hover: #e6e0d6;
   --on-dark: #FFFFFF;
 
-  /* Courbes d'easing : les défauts CSS sont trop mous pour de l'UI */
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Halos portés au hover — voir `.hover-glow`. Teintés, jamais neutres :
+     une ombre grise sur un fond sable vire au sale. */
+  --glow-primary: rgba(233, 106, 0, 0.32);
+  --glow-heading: rgba(11, 110, 79, 0.18);
 }
+
+/* Les durées (`--duration-*`) et les courbes (`--ease-*`) ne sont pas déclarées
+   ici : elles sont émises par le plugin de `tailwind.config.ts` depuis
+   `src/lib/motion.ts`, seule source de vérité du motion. */
 
 /* Thème sombre : mêmes accents, fonds foncés */
 .dark {
@@ -41,6 +45,9 @@
   --card: #2a2e2a;
   --card-hover: #333832;
   --on-dark: #FFFFFF;
+
+  --glow-primary: rgba(233, 106, 0, 0.28);
+  --glow-heading: rgba(45, 212, 160, 0.16);
 }
 
 .dark body::before,
@@ -118,10 +125,12 @@ h2::after {
   border-radius: 50%;
   opacity: 0.35;
   pointer-events: none;
-  will-change: transform;
   -webkit-mask-image: radial-gradient(closest-side, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
   mask-image: radial-gradient(closest-side, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
 }
+/* Pas de `will-change` permanent : il garderait cinq couches GPU vivantes en
+   continu alors que la parallaxe ne tourne que pendant le mouvement de souris.
+   La boucle rAF du Hero le pose et le retire elle-même. */
 
 .scroll-progress {
   height: 3px;
@@ -145,6 +154,35 @@ h2::after {
 .btn-secondary:hover {
   background: var(--heading);
   color: var(--on-dark);
+}
+
+/* Halo porté au hover, en `opacity` plutôt qu'en `box-shadow` animé.
+   Un box-shadow à grand rayon de flou repasse par le paint à chaque frame, sur
+   toute la surface de la carte — et les cartes projets font déjà tourner une
+   boucle rAF de tilt sur la même frame. Le calque, lui, est composité. */
+.hover-glow {
+  position: relative;
+}
+.hover-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.hover-glow-primary::after {
+  box-shadow: 0 12px 32px -8px var(--glow-primary);
+}
+.hover-glow-heading::after {
+  box-shadow: 0 20px 44px -12px var(--glow-heading);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hover-glow:hover::after {
+    opacity: 1;
+  }
 }
 
 /* Lien accent rouge (hover) */
@@ -191,7 +229,8 @@ a[href].text-heading:hover {
 .form-status {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+  transition: opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 @starting-style {
   .form-status {
@@ -203,7 +242,8 @@ a[href].text-heading:hover {
 /* Crossfade des icônes du toggle de thème */
 .theme-icon {
   grid-area: 1 / 1;
-  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+  transition: opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 .theme-icon[data-active="false"] {
   opacity: 0;
@@ -213,7 +253,8 @@ a[href].text-heading:hover {
 /* Crossfade du label du bouton submit pendant le chargement.
    Le flou masque le fait qu'on voit deux textes se substituer. */
 .btn-label {
-  transition: filter 200ms var(--ease-out), opacity 200ms var(--ease-out);
+  transition: filter var(--duration-base) var(--ease-out),
+    opacity var(--duration-base) var(--ease-out);
 }
 .btn-label[data-loading="true"] {
   filter: blur(2px);
@@ -242,14 +283,23 @@ a[href].text-heading:hover {
 }
 
 /* Motion réduit : on retire les déplacements, on garde les fondus et les
-   transitions de couleur qui aident à la compréhension. */
+   transitions de couleur qui aident à la compréhension.
+   « Reduced » veut dire moins de mouvement, pas plus d'animation du tout — tout
+   mettre à `0.01ms` supprimerait aussi le crossfade du toggle de thème et le
+   fondu des messages de formulaire, qui n'ont rien de vestibulaire.
+   La liste blanche ci-dessous exclut `transform` et `filter` : les changements
+   de position s'appliquent alors instantanément, les fondus gardent leur durée.
+   Note : ce bloc ne peut rien contre GSAP, qui écrit des styles inline frame
+   par frame. Les tweens sont gardés côté JS via `revealFrom()`. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transition-property: opacity, color, background-color, border-color, fill,
+      stroke, box-shadow !important;
+    transition-duration: var(--duration-fast) !important;
   }
 }
