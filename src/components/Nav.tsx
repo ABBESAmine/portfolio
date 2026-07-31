@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ThemeToggle } from "@/components/ThemeProvider";
 import { GITHUB_URL, LINKEDIN_URL } from "@/lib/config";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { duration, gsapEase, revealFrom, sec, stagger } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,19 +28,19 @@ function BurgerIcon({ open }: { open: boolean }) {
   return (
     <span className="relative block h-5 w-6" aria-hidden>
       <span
-        className={`${bar} transition-transform duration-200 ease-out-strong ${
+        className={`${bar} transition-transform duration-base ease-out-strong ${
           open ? "rotate-45" : "-translate-y-[6px]"
         }`}
       />
       {/* scale-x-50 et non scale-x-0 : rien ne disparaît en devenant de
           largeur nulle. */}
       <span
-        className={`${bar} transition-[transform,opacity] duration-200 ease-out-strong ${
+        className={`${bar} transition-[transform,opacity] duration-base ease-out-strong ${
           open ? "opacity-0 scale-x-50" : ""
         }`}
       />
       <span
-        className={`${bar} transition-transform duration-200 ease-out-strong ${
+        className={`${bar} transition-transform duration-base ease-out-strong ${
           open ? "-rotate-45" : "translate-y-[6px]"
         }`}
       />
@@ -53,10 +55,19 @@ export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    // delay 0.15 et non 0.6 : la navigation principale restait invisible près
+    // d'une seconde après le chargement, pour une raison purement décorative.
     gsap.fromTo(
       desktopRef.current?.querySelectorAll("a") ?? [],
-      { x: -10, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.4, stagger: 0.06, delay: 0.6 }
+      revealFrom({ x: -10 }, prefersReducedMotion()),
+      {
+        x: 0,
+        opacity: 1,
+        duration: sec(duration.reveal),
+        ease: gsapEase.out,
+        stagger: stagger.loose,
+        delay: 0.15,
+      }
     );
   }, []);
 
@@ -89,10 +100,14 @@ export function Nav() {
   const closeMobile = () => setMobileOpen(false);
 
   const linkBase =
-    "text-sm font-medium block transition-[color,transform] duration-200 ease-out-strong active:scale-[0.97]";
+    "text-sm font-medium block transition-[color,transform] duration-fast ease-out-strong active:scale-[0.97]";
   const linkActive = "text-heading";
   const linkInactive = "text-muted hover:text-heading";
 
+  // Le lien actif décalait de 8px en translateX. Piloté par ScrollTrigger, ce
+  // décalage rejouait à chaque changement de section : du mouvement en vision
+  // périphérique, des dizaines de fois par visite, pour une information que le
+  // passage en text-heading porte déjà. Seule la couleur change désormais.
   const navLinks = sections.map(({ id, label }) => {
     const isActive = activeId === id;
     return (
@@ -101,7 +116,7 @@ export function Nav() {
         href={`#${id}`}
         onClick={closeMobile}
         className={`${linkBase} ${isActive ? linkActive : linkInactive} py-2`}
-        style={isActive ? { transform: "translateX(8px)" } : undefined}
+        aria-current={isActive ? "true" : undefined}
       >
         {label}
       </a>
@@ -163,7 +178,7 @@ export function Nav() {
             <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-heading/30 active:scale-[0.94] transition-[transform,background-color] duration-150 ease-out-strong"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-heading/30 active:scale-[0.94] transition-[transform,background-color] duration-press ease-out-strong"
             aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={mobileOpen}
             >
@@ -177,8 +192,8 @@ export function Nav() {
           ref={mobileMenuRef}
           className={`absolute left-0 right-0 top-full origin-top border-b border-border bg-background/98 backdrop-blur-md shadow-lg transition-[opacity,transform] ease-out-strong lg:hidden ${
             mobileOpen
-              ? "opacity-100 translate-y-0 scale-100 duration-200"
-              : "opacity-0 -translate-y-2 scale-[0.98] pointer-events-none duration-150"
+              ? "opacity-100 translate-y-0 scale-100 duration-base"
+              : "opacity-0 -translate-y-2 scale-[0.98] pointer-events-none duration-fast"
           }`}
           aria-hidden={!mobileOpen}
         >
@@ -190,15 +205,23 @@ export function Nav() {
           </nav>
         </div>
 
-        {/* Overlay pour fermer au clic extérieur (optionnel, sur grand écran tactile) */}
-        {mobileOpen && (
-          <button
-            type="button"
-            className="fixed inset-0 z-[-1] bg-black/20 lg:hidden"
-            onClick={closeMobile}
-            aria-label="Fermer le menu"
-          />
-        )}
+        {/* Overlay pour fermer au clic extérieur.
+            Monté en permanence : conditionner son rendu à `mobileOpen` le
+            faisait apparaître et disparaître d'un coup pendant que le panneau,
+            lui, glissait. La sortie était le plus visible — le voile sautait
+            avant que le panneau ait fini son mouvement. */}
+        <button
+          type="button"
+          className={`fixed inset-0 z-[-1] bg-black/20 transition-opacity ease-out-strong lg:hidden ${
+            mobileOpen
+              ? "opacity-100 duration-base"
+              : "opacity-0 pointer-events-none duration-fast"
+          }`}
+          onClick={closeMobile}
+          aria-label="Fermer le menu"
+          aria-hidden={!mobileOpen}
+          tabIndex={mobileOpen ? 0 : -1}
+        />
       </header>
     </>
   );
