@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { duration, gsapEase, revealFrom, sec, stagger } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,14 +24,16 @@ export function Skills({ initialData = [] }: { initialData?: { name: string }[] 
   }, []);
 
   useEffect(() => {
+    const reduced = prefersReducedMotion();
     const ctx = gsap.context(() => {
       gsap.fromTo(
         titleRef.current,
-        { y: 40, opacity: 0 },
+        revealFrom({ y: 40 }, reduced),
         {
           y: 0,
           opacity: 1,
-          duration: 0.7,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
@@ -39,12 +43,13 @@ export function Skills({ initialData = [] }: { initialData?: { name: string }[] 
       );
       gsap.fromTo(
         gridRef.current?.querySelectorAll(".skill-badge") ?? [],
-        { opacity: 0, y: 20 },
+        revealFrom({ y: 20 }, reduced),
         {
           opacity: 1,
           y: 0,
-          duration: 0.5,
-          stagger: 0.04,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
+          stagger: stagger.tight,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
@@ -79,7 +84,7 @@ export function Skills({ initialData = [] }: { initialData?: { name: string }[] 
           {skills.map((name) => (
             <span
               key={name}
-              className="skill-badge shrink-0 px-4 py-3 rounded-xl bg-card border border-border text-foreground font-medium text-sm text-center hover:bg-card-hover hover:border-heading/40 hover:text-heading transition-[background-color,border-color,color] duration-150 ease-out-strong"
+              className="skill-badge shrink-0 px-4 py-3 rounded-xl bg-card border border-border text-foreground font-medium text-sm text-center hover:bg-card-hover hover:border-heading/40 hover:text-heading transition-[background-color,border-color,color] duration-fast ease-out-strong"
             >
               {name}
             </span>

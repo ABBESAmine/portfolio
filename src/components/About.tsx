@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { duration, gsapEase, revealFrom, sec, stagger } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,14 +15,16 @@ export function About() {
   const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const reduced = prefersReducedMotion();
     const ctx = gsap.context(() => {
       gsap.fromTo(
         titleRef.current,
-        { y: 40, opacity: 0 },
+        revealFrom({ y: 40 }, reduced),
         {
           y: 0,
           opacity: 1,
-          duration: 0.7,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
@@ -30,11 +34,12 @@ export function About() {
       );
       gsap.fromTo(
         textRef.current,
-        { x: -30, opacity: 0 },
+        revealFrom({ x: -30 }, reduced),
         {
           x: 0,
           opacity: 1,
-          duration: 0.6,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 78%",
@@ -45,12 +50,13 @@ export function About() {
       );
       gsap.fromTo(
         statsRef.current?.querySelectorAll(".stat") ?? [],
-        { y: 25, opacity: 0 },
+        revealFrom({ y: 25 }, reduced),
         {
           y: 0,
           opacity: 1,
-          duration: 0.5,
-          stagger: 0.1,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
+          stagger: stagger.loose,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 70%",
@@ -109,7 +115,7 @@ export function About() {
           {stats.map(({ value, label }) => (
             <div
               key={label}
-              className="stat text-center p-6 rounded-2xl bg-background border border-border hover:border-heading/40 transition-colors"
+              className="stat text-center p-6 rounded-2xl bg-background border border-border hover:border-heading/40 transition-colors duration-fast ease-out-strong"
             >
               <span className="font-display text-3xl md:text-4xl font-bold gradient-text block">
                 {value}

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { duration, gsapEase, revealFrom, sec } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,14 +31,16 @@ export function Experience({ initialData = [] }: { initialData?: ExperienceItem[
   }, []);
 
   useEffect(() => {
+    const reduced = prefersReducedMotion();
     const ctx = gsap.context(() => {
       gsap.fromTo(
         titleRef.current,
-        { y: 40, opacity: 0 },
+        revealFrom({ y: 40 }, reduced),
         {
           y: 0,
           opacity: 1,
-          duration: 0.7,
+          duration: sec(duration.reveal),
+          ease: gsapEase.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
@@ -50,12 +54,12 @@ export function Experience({ initialData = [] }: { initialData?: ExperienceItem[
         // pas de delay indexé, sinon les derniers attendent sans raison.
         gsap.fromTo(
           el,
-          { x: -24, opacity: 0 },
+          revealFrom({ x: -24 }, reduced),
           {
             x: 0,
             opacity: 1,
-            duration: 0.45,
-            ease: "expo.out",
+            duration: sec(duration.reveal),
+            ease: gsapEase.out,
             scrollTrigger: { trigger: el, start: "top 88%", once: true },
           }
         );
@@ -90,7 +94,7 @@ export function Experience({ initialData = [] }: { initialData?: ExperienceItem[
               >
                 {/* Pastille centrée sur la barre : bordure 2px + padding (24/32px) + moitié pastille (6px) - centre du trait = 31px / 39px */}
                 <span className="absolute top-1 -left-[31px] md:-left-[39px] w-3 h-3 rounded-full bg-heading shrink-0" />
-                <div className="p-6 rounded-2xl bg-card border border-border hover:border-heading/40 transition-colors">
+                <div className="p-6 rounded-2xl bg-card border border-border hover:border-heading/40 transition-colors duration-fast ease-out-strong">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h3 className="text-lg font-semibold text-foreground">
                       {exp.role}
